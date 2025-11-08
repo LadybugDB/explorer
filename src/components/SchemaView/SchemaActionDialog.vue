@@ -94,7 +94,7 @@ import { SCHEMA_ACTION_TYPES } from "../../utils/Constants";
 import Axios from "@/utils/AxiosWrapper";
 import { useModeStore } from "../../store/ModeStore";
 import { mapStores } from "pinia";
-import Kuzu from "@/utils/KuzuWasm";
+import Lbug from "@/utils/LbugWasm";
 
 export default {
   name: "SchemaActionDialog",
@@ -125,7 +125,7 @@ export default {
     },
     async evaluateCypher(query) {
       const promise = this.modeStore.isWasm ?
-        Kuzu.query(query) :
+        Lbug.query(query) :
         Axios.post("/api/cypher", { query });
       promise.then(() => {
         this.isExecuting = false;

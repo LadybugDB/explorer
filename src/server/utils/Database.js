@@ -10,34 +10,34 @@ const CONSTANTS = require("./Constants");
 const MODES = CONSTANTS.MODES;
 const READ_WRITE_MODE = MODES.READ_WRITE;
 
-let kuzu;
+let lbug;
 if (process.env.NODE_ENV !== "production") {
   const kuzuPath = path.join(
     __dirname,
     "..",
     "..",
     "..",
-    "kuzu",
+    "ladybug",
     "tools",
     "nodejs_api",
     "build/"
   );
-  kuzu = require(kuzuPath);
+  lbug = require(kuzuPath);
 } else {
-  kuzu = require("kuzu");
+  lbug = require("lbug");
 }
 const os = require("os");
 
 class Database {
   constructor() {
-    const isWasmMode = process.env.KUZU_WASM &&
-      process.env.KUZU_WASM.toLowerCase() === "true";
+    const isWasmMode = process.env.LBUG_WASM &&
+      process.env.LBUG_WASM.toLowerCase() === "true";
     if (isWasmMode) {
       return;
     }
-    const dbDir = process.env.KUZU_DIR;
-    const isInMemory = (process.env.KUZU_IN_MEMORY &&
-      process.env.KUZU_IN_MEMORY.toLowerCase() === "true") ||
+    const dbDir = process.env.LBUG_DIR;
+    const isInMemory = (process.env.LBUG_IN_MEMORY &&
+      process.env.LBUG_IN_MEMORY.toLowerCase() === "true") ||
       !dbDir;
     const mode = this.getAccessModeString();
     const isReadOnlyMode = mode !== READ_WRITE_MODE;
@@ -46,11 +46,11 @@ class Database {
       logger.info("In-memory mode is enabled");
       dbPath = ":memory:";
     } else {
-      let dbFileName = process.env.KUZU_FILE;
+      let dbFileName = process.env.LBUG_FILE;
       if (!dbFileName) {
         dbFileName = "database.kz";
         logger.warn(
-          "KUZU_FILE environment variable not set, using default database file name: database.kz"
+          "LBUG_FILE environment variable not set, using default database file name: database.kz"
         );
       } else {
         logger.info(`Using database file: ${dbFileName}`);
@@ -59,11 +59,11 @@ class Database {
         path.join(dbDir, dbFileName)
       );
     }
-    let bufferPoolSize = parseInt(process.env.KUZU_BUFFER_POOL_SIZE);
+    let bufferPoolSize = parseInt(process.env.LBUG_BUFFER_POOL_SIZE);
     bufferPoolSize = isNaN(bufferPoolSize) ? 0 : bufferPoolSize;
-    let numberConnections = parseInt(process.env.KUZU_NUM_CONNECTIONS);
+    let numberConnections = parseInt(process.env.LBUG_NUM_CONNECTIONS);
     numberConnections = isNaN(numberConnections) ? 1 : numberConnections;
-    let numberOfCores = parseInt(process.env.KUZU_NUM_CORES);
+    let numberOfCores = parseInt(process.env.LBUG_NUM_CORES);
     numberOfCores =
       isNaN(numberOfCores) || numberOfCores < 1
         ? os.cpus().length
@@ -89,7 +89,7 @@ class Database {
     logger.info(
       `Access mode: ${isReadOnlyMode ? MODES.READ_ONLY : MODES.READ_WRITE}`
     );
-    const queryTimeout = parseInt(process.env.KUZU_QUERY_TIMEOUT);
+    const queryTimeout = parseInt(process.env.LBUG_QUERY_TIMEOUT);
     if (!isNaN(queryTimeout)) {
       logger.info(`Query timeout: ${queryTimeout} ms`);
     }
@@ -111,11 +111,11 @@ class Database {
   }
 
   init() {
-    this.db = new kuzu.Database(this.dbPath, this.bufferPoolSize, true, this.isReadOnlyMode);
+    this.db = new lbug.Database(this.dbPath, this.bufferPoolSize, true, this.isReadOnlyMode);
     this.connectionPool = [];
     for (let i = 0; i < this.numberConnections; ++i) {
       const conn = {
-        connection: new kuzu.Connection(this.db, this.coresPerConnection),
+        connection: new lbug.Connection(this.db, this.coresPerConnection),
         useCount: 0,
         id: i,
       };
@@ -126,8 +126,8 @@ class Database {
     }
   }
 
-  get kuzu() {
-    return kuzu;
+  get lbug() {
+    return lbug;
   }
 
   getAccessModeString() {
@@ -171,7 +171,7 @@ class Database {
       (conn) => conn.useCount === 0
     );
     if (!isAllConnectionsReleased) {
-      throw new Error("Please make sure no queries are running before resetting Kuzu.");
+      throw new Error("Please make sure no queries are running before resetting Lbug.");
     }
     const oldConnectionPool = this.connectionPool;
     const oldDb = this.db;
@@ -260,7 +260,7 @@ class Database {
     const packagePath = path.join(__dirname, "..", "..", "..", "package.json");
     return fs.promises.readFile(packagePath, "utf8").then((data) => {
       const packageJson = JSON.parse(data);
-      return packageJson.dependencies.kuzu;
+      return packageJson.dependencies.lbug;
     });
   }
 
@@ -272,7 +272,7 @@ class Database {
       const version = packageVersion.includes("dev")
         ? packageVersion
         : queryVersion;
-      const storageVersion = this.kuzu.STORAGE_VERSION;
+      const storageVersion = this.lbug.STORAGE_VERSION;
       return { version, storageVersion };
     });
   }

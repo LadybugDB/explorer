@@ -233,7 +233,7 @@ export const useSettingsStore = defineStore("settings", {
       if (storedSettingsCopy.colors) {
         this.colors = storedSettingsCopy.colors;
       }
-      // The schema may be changed outside of Kuzu Explorer, so we reset the
+      // The schema may be changed outside of Lbug Explorer, so we reset the
       // graphViz settings and merge the stored settings with current schema.
       this.graphViz.nodes = {};
       this.graphViz.rels = {};

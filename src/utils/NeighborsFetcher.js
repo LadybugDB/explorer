@@ -1,6 +1,6 @@
 import Axios from "@/utils/AxiosWrapper";
 import DataDefinitionLanguage from "./DataDefinitionLanguage";
-import Kuzu from "./KuzuWasm";
+import Lbug from "./LbugWasm";
 
 class NeighborsFetcher {
   constructor() { }
@@ -27,7 +27,7 @@ class NeighborsFetcher {
       queries.map(
         query => {
           if (isWasm) {
-            return Kuzu.query(query, params)
+            return Lbug.query(query, params)
               .catch(err => {
                 console.error("Cannot fetch neighbors", err);
                 return null;

@@ -5,8 +5,8 @@ const logger = require("./utils/Logger");
 const MODES = require("./utils/Constants").MODES;
 
 
-const isWasmMode = process.env.KUZU_WASM &&
-    process.env.KUZU_WASM.toLowerCase() === "true";
+const isWasmMode = process.env.LBUG_WASM &&
+    process.env.LBUG_WASM.toLowerCase() === "true";
 
 // APIs that are only available in backend mode
 if (!isWasmMode) {

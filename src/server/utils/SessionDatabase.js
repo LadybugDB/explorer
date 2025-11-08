@@ -10,7 +10,7 @@ const DB_FILE_NAME = "explorer.db";
 class SessionDatabase {
   constructor() {
     this.isInitialized = false;
-    const dbPath = process.env.KUZU_DIR;
+    const dbPath = process.env.LBUG_DIR;
     if (!dbPath) {
       return;
     }

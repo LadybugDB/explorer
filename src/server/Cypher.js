@@ -11,7 +11,7 @@ try {
 
 const DEMO_MODE = MODES.DEMO;
 
-let querySizeLimit = parseInt(process.env.KUZU_QUERY_SIZE_LIMIT);
+let querySizeLimit = parseInt(process.env.LBUG_QUERY_SIZE_LIMIT);
 querySizeLimit = isNaN(querySizeLimit) ? null : querySizeLimit;
 if (querySizeLimit) {
   logger.info(`Query size limit: ${querySizeLimit}`);

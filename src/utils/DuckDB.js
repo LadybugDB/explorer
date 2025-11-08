@@ -150,7 +150,7 @@ class DuckDB {
     return result;
   }
 
-  convertDuckDBTypeToKuzuType(typeStr) {
+  convertDuckDBTypeToLbugType(typeStr) {
     if (typeStr == "BIGINT" || typeStr == "INT8" || typeStr == "LONG") {
       return DATA_TYPES.INT64;
     } else if (typeStr == "BLOB" || typeStr == "BYTEA" || typeStr == "BINARY" ||

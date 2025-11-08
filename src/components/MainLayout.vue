@@ -218,7 +218,7 @@
               </p>
               <hr>
               <div
-                v-if="!isKuzuWasmInitialized"
+                v-if="!isLbugWasmInitialized"
                 class="d-flex align-items-center"
               >
                 <strong class="text-primary">Initializing WebAssembly module...</strong>
@@ -270,7 +270,7 @@ import { useModeStore } from "../store/ModeStore";
 import { mapActions, mapStores } from 'pinia'
 import { Modal } from 'bootstrap';
 import DuckDB from '../utils/DuckDB';
-import Kuzu from '../utils/KuzuWasm';
+import Lbug from '../utils/LbugWasm';
 
 
 export default {
@@ -290,7 +290,7 @@ export default {
     showLoader: false,
     showSettings: false,
     schema: null,
-    isKuzuWasmInitialized: false,
+    isLbugWasmInitialized: false,
     isSidebarCollapsed: false,
   }),
   computed: {
@@ -325,9 +325,9 @@ export default {
     }
 
     if (this.modeStore.isWasm) {
-      this.isKuzuWasmInitialized = false;
-      await Kuzu.init();
-      this.isKuzuWasmInitialized = true;
+      this.isLbugWasmInitialized = false;
+      await Lbug.init();
+      this.isLbugWasmInitialized = true;
     }
 
     const res = await Promise.all([this.getSchema(), this.getStoredSettings()])
@@ -374,7 +374,7 @@ export default {
     async getSchema() {
       let schema;
       if (this.modeStore.isWasm) {
-        schema = await Kuzu.getSchema();
+        schema = await Lbug.getSchema();
       }
       else {
         const response = await Axios.get("/api/schema");

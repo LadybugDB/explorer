@@ -32,8 +32,8 @@ app.use(`${baseUrl}api`, api);
 const distPath = path.join(__dirname, "..", "..", "dist");
 app.use(`${baseUrl}`, express.static(distPath, { maxAge: "30d" }));
 
-const isWasmMode = process.env.KUZU_WASM &&
-  process.env.KUZU_WASM.toLowerCase() === "true";
+const isWasmMode = process.env.LBUG_WASM &&
+  process.env.LBUG_WASM.toLowerCase() === "true";
 
 if (!isWasmMode) {
   database.getDbVersion()
@@ -41,17 +41,17 @@ if (!isWasmMode) {
       const version = res.version;
       const storageVersion = res.storageVersion;
       const isInitialDatabaseEmpty = database.isInitialDatabaseEmpty;
-      logger.info("Version of Kuzu: " + version);
-      logger.info("Storage version of Kuzu: " + storageVersion);
+      logger.info("Version of Lbug: " + version);
+      logger.info("Storage version of Lbug: " + storageVersion);
       if (!isInitialDatabaseEmpty && version.includes("dev")) {
-        logger.warn("You are running a dev build of Kuzu Explorer. Please make sure that the database files opened are created by the same version of Kuzu");
+        logger.warn("You are running a dev build of Lbug Explorer. Please make sure that the database files opened are created by the same version of Lbug");
       }
       app.listen(PORT, () => {
         logger.info("Deployed server started on port: " + PORT);
       });
     })
     .catch((err) => {
-      logger.error("Error getting version of Kuzu: " + err);
+      logger.error("Error getting version of Lbug: " + err);
     });
 } else {
   app.listen(PORT, () => {

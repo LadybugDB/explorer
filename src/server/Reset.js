@@ -8,11 +8,11 @@ router.post("/", async (_, res) => {
     const mode = database.getAccessModeString();
     if (mode === MODES.DEMO_MODE) {
       return res.status(400).send({
-        error: "Cannot reset Kuzu in live demo mode.",
+        error: "Cannot reset Lbug in live demo mode.",
       });
     }
     await database.reset();
-    return res.send({ message: "Kuzu has been reset." });
+    return res.send({ message: "Lbug has been reset." });
   } catch (err) {
     return res.status(400).send({ error: err.message });
   }

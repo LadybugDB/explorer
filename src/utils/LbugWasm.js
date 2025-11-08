@@ -1,18 +1,18 @@
-import kuzu from "kuzu-wasm";
+import lbug from "lbug-wasm";
 import { TABLE_TYPES } from "./Constants";
 
 // TODO: Refactor this and extract common logic between frontend WASM module
 // and backend Node.js module after we move the backend to use ESM instead of 
 // CommonJS.
-class Kuzu {
+class Lbug {
   constructor() {
     const baseUrl = process.env.BASE_URL;
     this.db = null;
     this.conn = null;
     this._schema = null;
-    kuzu.setWorkerPath(`${baseUrl}js/kuzu_wasm_worker.js`);
-    this.kuzu = kuzu;
-    window.kuzu = this; // For debugging
+    lbug.setWorkerPath(`${baseUrl}js/kuzu_wasm_worker.js`);
+    this.lbug = lbug;
+    window.lbug = this; // For debugging
   }
 
   async init() {
@@ -21,15 +21,15 @@ class Kuzu {
       delete this.initializationPromise;
       return;
     }
-    console.time("Kuzu init");
-    const db = new kuzu.Database(":memory:", 2147483648, 0, true, false, true, 16777216);
-    const conn = new kuzu.Connection(db);
+    console.time("Lbug init");
+    const db = new lbug.Database(":memory:", 2147483648, 0, true, false, true, 16777216);
+    const conn = new lbug.Connection(db);
     const versionResult = await conn.query(`CALL db_version() RETURN *;`);
     const version = (await versionResult.getAllRows())[0][0];
-    console.log("Kuzu WebAssembly module version:", version);
+    console.log("Lbug WebAssembly module version:", version);
     this.db = db;
     this.conn = conn;
-    console.timeEnd("Kuzu init");
+    console.timeEnd("Lbug init");
     this._schema = await this.getSchema();
   }
 
@@ -172,10 +172,10 @@ class Kuzu {
   }
 
   getFS() {
-    return this.kuzu.FS;
+    return this.lbug.FS;
   }
 }
 
 // Singleton instance
-const instance = new Kuzu();
+const instance = new Lbug();
 export default instance;

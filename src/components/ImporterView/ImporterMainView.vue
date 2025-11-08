@@ -107,7 +107,7 @@ import { mapStores } from 'pinia';
 import { useModeStore } from '../../store/ModeStore';
 import { DATA_TYPES, IMPORT_ACTIONS, JOB_STATUS } from '../../utils/Constants';
 import DuckDB from '../../utils/DuckDB';
-import Kuzu from '../../utils/KuzuWasm';
+import Lbug from '../../utils/LbugWasm';
 import ImporterViewDropZone from './ImporterViewDropZone.vue';
 import ImporterViewSidebar from './ImporterViewSidebar.vue';
 import ImporterViewNodeTables from './ImporterViewNodeTables.vue';
@@ -313,7 +313,7 @@ export default {
           currentFile.format.IgnoreErrors = true;
         }
         currentFile.format.Columns.forEach((c, i) => {
-          c.type = DuckDB.convertDuckDBTypeToKuzuType(c.type);
+          c.type = DuckDB.convertDuckDBTypeToLbugType(c.type);
           c.userDefinedName = this.escapeName(c.name);
           c.name = currentFile.format.HasHeader ? c.name : `column${i}`;
           c.isPrimaryKey = false;
@@ -396,7 +396,7 @@ export default {
         return;
       }
       columns.forEach((c, i) => {
-        c.type = DuckDB.convertDuckDBTypeToKuzuType(c.type);
+        c.type = DuckDB.convertDuckDBTypeToLbugType(c.type);
         c.name = hasHeader ? c.name : `column${i}`;
         c.userDefinedName = this.escapeName(c.name);
       });
@@ -607,7 +607,7 @@ export default {
     },
 
     async getImportPlanFromWasm(summary) {
-      const schema = await Kuzu.getSchema();
+      const schema = await Lbug.getSchema();
       const config = summary.config;
       const { success, errors } = DataImportUtils.validateImport(config, schema);
       if (!success) {
@@ -679,7 +679,7 @@ export default {
     },
 
     async deleteCurrentJobFromWasm() {
-      const FS = Kuzu.getFS();
+      const FS = Lbug.getFS();
       const plan = this.currentJob.plan.filter(j => j.action === IMPORT_ACTIONS.UPLOAD);
       for (let i = 0; i < plan.length; ++i) {
         const job = plan[i];
@@ -703,10 +703,16 @@ export default {
       }
     },
 
+    await this.executeImportWasm();
+      } else {
+        await this.executeImportWasm();
+      }
+    },
+
     async executeImportWasm() {
       const plan = this.currentJob.plan.filter(j => j.action !== IMPORT_ACTIONS.UPLOAD);
-      const db = await Kuzu.getDb();
-      const conn = new Kuzu.kuzu.Connection(db);
+      const db = await Lbug.getDb();
+            const conn = new Lbug.lbug.Connection(db);
       try {
         await conn.query("CALL clear_warnings();");
       } catch (error) {
@@ -799,7 +805,7 @@ export default {
               }
             });
           } else {
-            const FS = Kuzu.getFS();
+            const FS = Lbug.getFS();
             const fileData = await file.file.arrayBuffer();
             await FS.writeFile(virtualFileName, new Uint8Array(fileData));
           }

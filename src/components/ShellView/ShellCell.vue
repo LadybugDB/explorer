@@ -47,7 +47,7 @@ import Axios from "@/utils/AxiosWrapper";
 import { useModeStore } from "../../store/ModeStore";
 import { useSettingsStore } from "../../store/SettingsStore";
 import { mapStores } from "pinia";
-import Kuzu from "@/utils/KuzuWasm";
+import Lbug from "@/utils/LbugWasm";
 import { LOADING_STATUS, LLM_PROVIDERS } from "@/utils/Constants";
 
 export default {
@@ -116,7 +116,7 @@ export default {
 
       // TODO: Refactor
       if (this.modeStore.isWasm) {
-        Kuzu.query(query).then(data => {
+        Lbug.query(query).then(data => {
           this.handleEvaluationDataChange(data, query);
         }).catch(error => {
           this.errorMessage = error.message;

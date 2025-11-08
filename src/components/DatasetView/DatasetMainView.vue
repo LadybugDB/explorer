@@ -151,7 +151,7 @@
 import Axios from "@/utils/AxiosWrapper";
 import { mapStores } from 'pinia';
 import { useModeStore } from '../../store/ModeStore';
-import Kuzu from '../../utils/KuzuWasm';
+import Lbug from '../../utils/LbugWasm';
 export default {
   name: "DatasetMainView",
   props: {
@@ -254,7 +254,7 @@ export default {
         }));
         this.datasetLoadingLog += "Dataset files downloaded.\n";
         this.datasetLoadingLog += "Loading files into WASM filesystem...\n";
-        const FS = Kuzu.getFS();
+        const FS = Lbug.getFS();
         for (let i = 0; i < datasetMetadata.files.length; ++i) {
           const file = datasetMetadata.files[i];
           const data = datasetFiles[i];
@@ -269,7 +269,7 @@ export default {
             continue;
           }
           this.datasetLoadingLog += `Executing Cypher query '${query}'...\n`;
-          await Kuzu.query(query);
+          await Lbug.query(query);
           this.datasetLoadingLog += `Query executed.\n`;
         }
         for (const file of datasetMetadata.files) {
