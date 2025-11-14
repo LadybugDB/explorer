@@ -1,13 +1,13 @@
 {
-  "repository": "https://github.com/kuzudb/kuzu",
-  "commitHash": "83e28e4eba40594835156903f0a2826fcd2e865c",
+  "repository": "https://github.com/LadybugDB/ladybug",
+  "commitHash": "d3d232ae8a30f5b875dc62b252b4496d4da26737",
   "datasetsRoot": "dataset",
   "datasets": [
     {
       "name": "Tutorial Dataset",
       "path": "demo-db/csv",
       "isProduction": true,
-      "description": "Data used in Create Your First Graph (https://docs.kuzudb.com/get-started/) tutorial."
+      "description": "Data used in Create Your First Graph (https://docs.ladybugdb.com/get-started/) tutorial."
     },
     {
       "name": "TinySNB",
