@@ -1,4 +1,4 @@
-import lbug from "lbug-wasm";
+import lbug from "@lbug/lbug-wasm";
 import { TABLE_TYPES } from "./Constants";
 
 // TODO: Refactor this and extract common logic between frontend WASM module
@@ -10,7 +10,8 @@ class Lbug {
     this.db = null;
     this.conn = null;
     this._schema = null;
-    lbug.setWorkerPath(`${baseUrl}js/kuzu_wasm_worker.js`);
+    // TODO: Update this to the correct worker path
+    lbug.setWorkerPath(`${baseUrl}js/lbug_wasm_worker.js`);
     this.lbug = lbug;
     window.lbug = this; // For debugging
   }

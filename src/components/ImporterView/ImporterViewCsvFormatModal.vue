@@ -98,7 +98,7 @@
           <div class="d-flex justify-content-between w-100">
             <span>
               <a
-                href="https://docs.kuzudb.com/import/csv/"
+                href="https://docs.ladybugdb.com/import/csv/"
                 target="_blank"
               >
                 <button

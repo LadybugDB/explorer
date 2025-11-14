@@ -12,7 +12,7 @@ const READ_WRITE_MODE = MODES.READ_WRITE;
 
 let lbug;
 if (process.env.NODE_ENV !== "production") {
-  const kuzuPath = path.join(
+  const lbugPath = path.join(
     __dirname,
     "..",
     "..",
@@ -22,7 +22,7 @@ if (process.env.NODE_ENV !== "production") {
     "nodejs_api",
     "build/"
   );
-  lbug = require(kuzuPath);
+  lbug = require(lbugPath);
 } else {
   lbug = require("lbug");
 }

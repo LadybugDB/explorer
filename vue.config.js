@@ -1,7 +1,7 @@
 const { defineConfig } = require("@vue/cli-service");
 const path = require("path");
 const DUCKDB_DIST = path.dirname(require.resolve("@duckdb/duckdb-wasm"));
-const KUZUDB_WASM_DIST = path.dirname(require.resolve("kuzu-wasm"));
+const LBUGDB_WASM_DIST = path.dirname(require.resolve("@lbug/lbug-wasm"));
 const configureAPI = require("./src/server/Configure");
 const MonacoWebpackPlugin = require("monaco-editor-webpack-plugin");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
@@ -17,7 +17,7 @@ module.exports = defineConfig({
   pages: {
     index: {
       entry: "src/main.js",
-      title: "Kuzu Explorer",
+      title: "Ladybug Explorer",
     },
   },
   css: {
@@ -48,7 +48,7 @@ module.exports = defineConfig({
       new CopyWebpackPlugin({
         patterns: [
           {
-            from: KUZUDB_WASM_DIST,
+            from: LBUGDB_WASM_DIST,
             to: "js",
           },
         ],

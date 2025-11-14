@@ -106,7 +106,7 @@
           <li class="nav-item">
             <a
               aria-hidden="true"
-              href="https://docs.kuzudb.com"
+              href="https://docs.ladybugdb.com/"
               target="_blank"
             >
               <i class="fa-solid fa-book" />
@@ -194,20 +194,20 @@
             class="modal-header"
           >
             <h5 class="modal-title">
-              Welcome to Kuzu Explorer!
+              Welcome to Ladybug Explorer!
             </h5>
           </div>
           <div class="modal-body">
             <div v-if="modeStore.isDemo">
               <p>
-                This WebAssembly-powered demo of <a href="https://kuzudb.com/">Kuzu</a> lets you import and query graph
+                This WebAssembly-powered demo of <a href="https://kuzudb.com/">Ladybug</a> lets you import and query graph
                 data using
                 <a
-                  href="https://docs.kuzudb.com/cypher/"
+                  href="https://docs.ladybugdb.com/cypher/"
                   target="_blank"
                 >openCypher.</a>
                 See the <a
-                  href="https://docs.kuzudb.com/visualization/kuzu-explorer/"
+                  href="https://docs.ladybugdb.com/visualization/lbug-explorer/"
                   target="_blank"
                 >docs</a> or <a
                   href="https://www.youtube.com/watch?v=yKcVV_bhBTo"
@@ -237,9 +237,9 @@
               </div>
             </div>
             <p v-if="modeStore.isReadOnly">
-              Kuzu Explorer is running in read-only mode. In this mode, you cannot load a
+              Ladybug Explorer is running in read-only mode. In this mode, you cannot load a
               dataset, modify the schema, or execute write queries. If you want to make
-              changes to the database, please restart your Kuzu Explorer Docker image in
+              changes to the database, please restart your Ladybug Explorer Docker image in
               read-write mode.
             </p>
           </div>
@@ -297,6 +297,7 @@ export default {
     ...mapStores(useModeStore),
     logoUrl() {
       return this.modeStore.theme === 'vs-dark'
+      // TODO: update ladybug logo
         ? '/img/kuzu-logo-dark.png'
         : '/img/kuzu-logo-light.png';
     },

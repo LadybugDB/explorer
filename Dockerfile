@@ -1,4 +1,4 @@
-FROM node:20-bookworm-slim
+FROM node:20-trixie-slim
 
 ARG SKIP_GRAMMAR=false
 ARG SKIP_BUILD_APP=false
@@ -11,7 +11,7 @@ RUN echo "SKIP_DATASETS: $SKIP_DATASETS"
 RUN apt-get update && apt-get install -y libatomic1
 
 # Install dependencies
-RUN if [ "$SKIP_GRAMMAR" != "true" ] ; then apt-get update && apt-get install -y openjdk-17-jdk ; else echo "Skipping openjdk installation as grammar generation is skipped" ; fi
+RUN if [ "$SKIP_GRAMMAR" != "true" ] ; then apt-get update && apt-get install -y openjdk-21-jdk python3 python3-pip ; else echo "Skipping openjdk installation as grammar generation is skipped" ; fi
 RUN if [ "$SKIP_DATASETS" != "true" ] ; then apt-get update && apt-get install -y git ; else echo "Skipping git installation as dataset fetch is skipped" ; fi
 # Copy app
 COPY . /home/node/app
@@ -29,17 +29,18 @@ USER node
 # Set working directory
 WORKDIR /home/node/app
 
-# Install dependencies, generate grammar, and reduce size of kuzu node module
+# Install dependencies, generate grammar, and reduce size of lbug node module
 # Done in one step to reduce image size
 RUN npm install &&\
     if [ "$SKIP_GRAMMAR" != "true" ] ; then npm run generate-grammar-prod ; else echo "Skipping grammar generation" ; fi &&\
-    rm -rf node_modules/kuzu/prebuilt node_modules/kuzu/kuzu-source
+    rm -rf node_modules/lbug/prebuilt node_modules/lbug/lbug-source
 
 # Fetch datasets
 RUN if [ "$SKIP_DATASETS" != "true" ] ; then npm run fetch-datasets ; else echo "Skipping dataset fetch" ; fi
 
 # Build app
-RUN if [ "$SKIP_BUILD_APP" != "true" ] ; then npm run build ; else echo "Skipping build" ; fi
+# Increase Node.js heap size to avoid out of memory errors during build
+RUN if [ "$SKIP_BUILD_APP" != "true" ] ; then NODE_OPTIONS="--max-old-space-size=4096" npm run build ; else echo "Skipping build" ; fi
 
 # Expose port
 EXPOSE 8000
@@ -47,7 +48,7 @@ EXPOSE 8000
 # Set environment variables
 ENV NODE_ENV=production
 ENV PORT=8000
-ENV KUZU_DIR=/database
+ENV LBUG_DIR=/database
 
 # Run app
 ENTRYPOINT ["node", "src/server/index.js"]

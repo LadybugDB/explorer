@@ -4,7 +4,7 @@ const exec = require("child_process").exec;
 const process = require("process");
 
 const PACKAGE_JSON_PATH = path.resolve(__dirname, "../package.json");
-const CMD = "npm view kuzu@next version";
+const CMD = "npm view lbug@next version";
 
 (() => {
   exec(CMD, (error, stdout, _) => {
@@ -21,8 +21,8 @@ const CMD = "npm view kuzu@next version";
         process.exit(1);
       }
       const packageJson = JSON.parse(data);
-      packageJson.dependencies.kuzu = `${latestVersion}`;
-      packageJson.dependencies["kuzu-wasm"] = `${latestVersion}`;
+      packageJson.dependencies.lbug = `${latestVersion}`;
+      packageJson.dependencies["@lbug/lbug-wasm"] = `${latestVersion}`;
       fs.writeFile(
         PACKAGE_JSON_PATH,
         JSON.stringify(packageJson, null, 2),
@@ -31,7 +31,7 @@ const CMD = "npm view kuzu@next version";
             console.error("Error writing package.json", err);
             process.exit(1);
           }
-          console.log(`Updated kuzu to ${latestVersion}`);
+          console.log(`Updated ladybug to ${latestVersion}`);
           process.exit(0);
         }
       );

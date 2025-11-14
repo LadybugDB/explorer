@@ -7,10 +7,11 @@ on:
       - next
 
   schedule:
+    # TODO: change build / release schedule 
     # Schedule a nightly build two hours after publishing the daily build
-    # of kuzu (see https://github.com/kuzudb/kuzu/blob/master/.github/workflows/build-and-deploy.yml)
-    # The kuzu daily build is scheduled at 8:00 UTC. The two hours delay
-    # should give enough time for the kuzu build to finish.
+    # of ladybug (see https://github.com/LadybugDB/ladybug/blob/master/.github/workflows/build-and-deploy.yml)
+    # The ladybug daily build is scheduled at 8:00 UTC. The two hours delay
+    # should give enough time for the ladybug build to finish.
     - cron: "0 10 * * *"
 
   workflow_dispatch:
@@ -61,7 +62,7 @@ jobs:
       - name: Prebuild - get version
         shell: bash
         run: |
-          VERSION=$(node -e 'fs=require("fs");console.log(JSON.parse(fs.readFileSync("package.json")).dependencies.kuzu)')
+          VERSION=$(node -e 'fs=require("fs");console.log(JSON.parse(fs.readFileSync("package.json")).dependencies.lbug)')
           echo "VERSION=$VERSION" >> $GITHUB_ENV
       - name: Prebuild - write version to file
         run: echo $VERSION > version.txt
@@ -92,14 +93,14 @@ jobs:
       - name: Get version
         shell: bash
         run: |
-          VERSION=$(node -e 'fs=require("fs");console.log(JSON.parse(fs.readFileSync("package.json")).dependencies.kuzu)')
+          VERSION=$(node -e 'fs=require("fs");console.log(JSON.parse(fs.readFileSync("package.json")).dependencies.lbug)')
           echo "VERSION=$VERSION" >> $GITHUB_ENV
       - name: Set tag for nightly build
         if: ${{ github.event_name == 'schedule' || github.event.inputs.isNightly == 'true' || github.ref_name == 'next' }}
-        run: echo "TAGS=kuzudb/explorer:dev,ghcr.io/${{ github.repository_owner }}/explorer:dev" >> $GITHUB_ENV
+        run: echo "TAGS=lbugdb/explorer:dev,ghcr.io/${{ github.repository_owner }}/explorer:dev" >> $GITHUB_ENV
       - name: Set tag for release build
         if: ${{ github.event_name != 'schedule' && github.event.inputs.isNightly != 'true' && github.ref_name != 'next' }}
-        run: echo "TAGS=kuzudb/explorer:latest,kuzudb/explorer:${{ env.VERSION }},ghcr.io/${{ github.repository_owner }}/explorer:latest,ghcr.io/${{ github.repository_owner }}/explorer:${{ env.VERSION }}" >> $GITHUB_ENV
+        run: echo "TAGS=lbugdb/explorer:latest,lbugdb/explorer:${{ env.VERSION }},ghcr.io/${{ github.repository_owner }}/explorer:latest,ghcr.io/${{ github.repository_owner }}/explorer:${{ env.VERSION }}" >> $GITHUB_ENV
       - name: Show tags
         run: echo $TAGS
       - name: Set up QEMU

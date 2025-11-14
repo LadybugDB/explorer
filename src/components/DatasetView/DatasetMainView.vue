@@ -24,7 +24,7 @@
         >
           <i class="fa-solid fa-info-circle" />
           You have already loaded a database. You can still review the schema of the sample
-          datasets. If you want to load a different dataset, please restart your Kuzu Explorer
+          datasets. If you want to load a different dataset, please restart your Ladybug Explorer
           Docker image with an empty database or drop all tables in the current database.
         </div>
 
@@ -57,7 +57,7 @@
           role="alert"
         >
           <i class="fa-solid fa-info-circle" />
-          You are running Kuzu Explorer in development mode. You can load any dataset into the
+          You are running Ladybug Explorer in development mode. You can load any dataset into the
           database. However, please make sure there is no conflict with the existing schema.
         </div>
 
@@ -67,8 +67,8 @@
           role="alert"
         >
           <i class="fa-solid fa-info-circle" />
-          Kuzu Explorer is running in read-only mode. You can still review the schema of the
-          sample datasets. If you want to load a dataset, please restart your Kuzu Explorer
+          Ladybug Explorer is running in read-only mode. You can still review the schema of the
+          sample datasets. If you want to load a dataset, please restart your Ladybug Explorer
           Docker image in read-write mode with an empty database.
         </div>
       </div>

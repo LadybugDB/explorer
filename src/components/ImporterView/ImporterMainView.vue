@@ -703,12 +703,6 @@ export default {
       }
     },
 
-    await this.executeImportWasm();
-      } else {
-        await this.executeImportWasm();
-      }
-    },
-
     async executeImportWasm() {
       const plan = this.currentJob.plan.filter(j => j.action !== IMPORT_ACTIONS.UPLOAD);
       const db = await Lbug.getDb();
