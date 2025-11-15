@@ -32,7 +32,7 @@
             <div class="main-layout__sidebar-header flex justify-between items-center">
               <a
                 class="navbar-brand hide-on-collapse"
-                href="//kuzudb.com"
+                href="//ladybugdb.com TODO: update to new domain"
                 target="_blank"
               >
                 <img
@@ -41,6 +41,7 @@
                   alt="Logo"
                   class="main-layout__sidebar-logo"
                 >
+                Ladybug
               </a>
 
               <a
@@ -298,8 +299,8 @@ export default {
     logoUrl() {
       return this.modeStore.theme === 'vs-dark'
       // TODO: update ladybug logo
-        ? '/img/kuzu-logo-dark.png'
-        : '/img/kuzu-logo-light.png';
+        ? '/img/logo.png'
+        : '/img/logo.png';
     },
   },
   mounted() {
