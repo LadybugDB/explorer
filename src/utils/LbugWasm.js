@@ -11,7 +11,7 @@ class Lbug {
     this.conn = null;
     this._schema = null;
     // TODO: Update this to the correct worker path
-    lbug.setWorkerPath(`${baseUrl}js/lbug_wasm_worker.js`);
+    // lbug.setWorkerPath(`${baseUrl}js/lbug-wasm.js`);
     this.lbug = lbug;
     window.lbug = this; // For debugging
   }

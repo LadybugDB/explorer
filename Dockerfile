@@ -49,6 +49,8 @@ EXPOSE 8000
 ENV NODE_ENV=production
 ENV PORT=8000
 ENV LBUG_DIR=/database
+# TODO: enable WASM mode once lbug-wasm is ready.
+ENV LBUG_WASM=false
 
 # Run app
 ENTRYPOINT ["node", "src/server/index.js"]
