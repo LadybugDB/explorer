@@ -95,12 +95,14 @@ jobs:
         run: |
           VERSION=$(node -e 'fs=require("fs");console.log(JSON.parse(fs.readFileSync("package.json")).dependencies.lbug)')
           echo "VERSION=$VERSION" >> $GITHUB_ENV
+      - name: Set lowercase owner
+        run: echo "OWNER=$(echo ${{ github.repository_owner }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
       - name: Set tag for nightly build
         if: ${{ github.event_name == 'schedule' || github.event.inputs.isNightly == 'true' || github.ref_name == 'next' }}
-        run: echo "TAGS=ghcr.io/${{ github.repository_owner }}/explorer:dev" >> $GITHUB_ENV
+        run: echo "TAGS=ghcr.io/${{ env.OWNER }}/explorer:dev" >> $GITHUB_ENV
       - name: Set tag for release build
         if: ${{ github.event_name != 'schedule' && github.event.inputs.isNightly != 'true' && github.ref_name != 'next' }}
-        run: echo "TAGS=ghcr.io/${{ github.repository_owner }}/explorer:latest,ghcr.io/${{ github.repository_owner }}/explorer:${{ env.VERSION }}" >> $GITHUB_ENV
+        run: echo "TAGS=ghcr.io/${{ env.OWNER }}/explorer:latest,ghcr.io/${{ env.OWNER }}/explorer:${{ env.VERSION }}" >> $GITHUB_ENV
       - name: Show tags
         run: echo $TAGS
       - name: Set up QEMU
