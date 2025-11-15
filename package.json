@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "license": "MIT",
   "scripts": {
-    "serve": "NODE_ENV=development nodemon --exec \"vue-cli-service serve\"",
-    "serve-prod": "NODE_ENV=production node src/server/index.js",
-    "build": "LBUG_IN_MEMORY=true NODE_ENV=production vue-cli-service build",
+    "serve": "NODE_ENV=development LBUG_WASM=false nodemon --exec \"vue-cli-service serve\"",
+    "serve-prod": "NODE_ENV=production LBUG_WASM=false node src/server/index.js",
+    "build": "LBUG_IN_MEMORY=true LBUG_WASM=false NODE_ENV=production vue-cli-service build",
     "lint": "vue-cli-service lint",
     "build-lbug": "cd ladybug/tools/nodejs_api/ && npm i && cd ../.. && make nodejs NUM_THREADS=$(node -e \"console.log(require('os').cpus().length)\")",
     "fetch-datasets": "node src/server/utils/FetchDatasets.js",
