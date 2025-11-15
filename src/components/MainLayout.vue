@@ -32,7 +32,7 @@
             <div class="main-layout__sidebar-header flex justify-between items-center">
               <a
                 class="navbar-brand hide-on-collapse"
-                href="//ladybugdb.com TODO: update to new domain"
+                href="//ladybugdb.com"
                 target="_blank"
               >
                 <img
