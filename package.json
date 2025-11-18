@@ -42,7 +42,11 @@
     "sqlite3": "^5.1.7",
     "uuid": "^9.0.1",
     "vue": "^3.2.13",
-    "node-gyp": "^12.1.0"
+    "node-gyp": "^12.1.0",
+    "express-session": "^1.17.3",
+    "jsonwebtoken": "^9.0.2",
+    "passport": "^0.7.0",
+    "passport-oauth2": "^1.8.0"
   },
   "devDependencies": {
     "@babel/core": "^7.12.16",
