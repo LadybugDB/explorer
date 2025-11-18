@@ -6,6 +6,7 @@ const process = require("process");
 const database = require("./utils/Database");
 const logger = require("./utils/Logger");
 const baseUrl = require("./utils/BaseURL");
+const { initializeAuth } = require("./auth");
 
 const CROSS_ORIGIN = process.env.CROSS_ORIGIN
   ? process.env.CROSS_ORIGIN.toLowerCase() === "true"
@@ -28,16 +29,28 @@ if (CROSS_ORIGIN) {
 }
 const PORT = process.env.PORT ? parseInt(process.env.PORT) : 8000;
 app.use(express.json({ limit: "128mb" }));
-app.use(`${baseUrl}api`, api);
+
 const distPath = path.join(__dirname, "..", "..", "dist");
 app.use(`${baseUrl}`, express.static(distPath, { maxAge: "30d" }));
 
 const isWasmMode = process.env.LBUG_WASM &&
   process.env.LBUG_WASM.toLowerCase() === "true";
 
-if (!isWasmMode) {
-  database.getDbVersion()
-    .then((res) => {
+// Initialize authentication and start server
+async function startServer() {
+   await initializeAuth(app);
+
+  // Mount API routes
+  app.use(`${baseUrl}api`, api);
+
+  // Mount token routes
+  const token = require("./token");
+  app.use(`${baseUrl}token`, token);
+
+  // Start server
+  if (!isWasmMode) {
+    try {
+      const res = await database.getDbVersion();
       const version = res.version;
       const storageVersion = res.storageVersion;
       const isInitialDatabaseEmpty = database.isInitialDatabaseEmpty;
@@ -49,12 +62,14 @@ if (!isWasmMode) {
       app.listen(PORT, () => {
         logger.info("Deployed server started on port: " + PORT);
       });
-    })
-    .catch((err) => {
+    } catch (err) {
       logger.error("Error getting version of Lbug: " + err);
+    }
+  } else {
+    app.listen(PORT, () => {
+      logger.info("Deployed server started on port: " + PORT);
     });
-} else {
-  app.listen(PORT, () => {
-    logger.info("Deployed server started on port: " + PORT);
-  });
+  }
 }
+
+startServer();
