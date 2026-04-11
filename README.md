@@ -27,7 +27,7 @@ To access an existing Ladybug database, you can mount its path to the `/database
 docker run -p 8000:8000 \
            -v {path to the directory containing the database file}:/database \
            -e LBUG_FILE={database file name} \
-           --rm lbugdb/explorer:latest
+           --rm ghcr.io/ladybugdb/explorer:latest
 ```
 
 By mounting local database files to Docker via `-v {path to the directory containing the database file}` and `-e LBUG_FILE={database file name}`, the changes done in the UI will persist to the local database files after the UI is shutdown. If the directory is mounted but the `LBUG_FILE` environment variable is not set, Ladybug Explorer will look for a file named `database.kz` in the mounted directory or create a new database file named `database.kz` in the mounted directory if it does not exist.
@@ -42,7 +42,7 @@ This is simply done by removing the `-v` flag in the example above. If no databa
 with `-v`, the server will be started with an empty database.
 
 ```bash
-docker run -p 8000:8000 --rm lbugdb/explorer:latest
+docker run -p 8000:8000 --rm ghcr.io/ladybugdb/explorer:latest
 ```
 
 Click on the `Datasets` tab on the top right corner and then: (i) you can select one of the bundled dataset
@@ -60,7 +60,7 @@ docker run -p 8000:8000 \
            -v {path to the directory containing the database file}:/database \
            -e LBUG_FILE={database file name} \
            -e MODE=READ_ONLY \
-           --rm lbugdb/explorer:latest
+           --rm ghcr.io/ladybugdb/explorer:latest
 ```
 
 In read-only mode, you can still issue read queries and visualize the results, but you cannot run write queries or modify the schema.
@@ -76,7 +76,7 @@ docker run -p 8000:8000 \
            -v {path to the directory containing the database file}:/database \
            -e LBUG_FILE={database file name} \
            -e LBUG_BUFFER_POOL_SIZE=1073741824 \
-           --rm lbugdb/explorer:latest
+           --rm ghcr.io/ladybugdb/explorer:latest
 ```
 
 #### In-memory mode
@@ -86,7 +86,7 @@ By default, Ladybug Explorer is launched in disk-based mode. If you want to laun
 ```bash
 docker run -p 8000:8000 \
            -e LBUG_IN_MEMORY=true \
-           --rm lbugdb/explorer:latest
+           --rm ghcr.io/ladybugdb/explorer:latest
 ```
 
 In in-memory mode, the database is stored in memory and all changes are lost when the server is shut down even if a database directory is mounted. Also, read-only access mode is not supported in in-memory mode.
@@ -98,7 +98,7 @@ In WebAssembly mode, Ladybug Explorer is launched with `@lbug/lbug-wasm`, which 
 ```bash
 docker run -p 8000:8000 \
            -e LBUG_WASM=true \
-           --rm lbugdb/explorer:latest
+           --rm ghcr.io/ladybugdb/explorer:latest
 ```
 
 In WebAssembly mode, the database is stored in the current browser session and all changes are lost when the browser tab is closed or when the tab is refreshed. All other configuration parameters are ignored in WebAssembly mode.
@@ -136,7 +136,7 @@ For example:
 podman run -p 8000:8000 \
            -v {path to the directory containing the database file}:/database:U \
            -e LBUG_FILE={database file name} \
-           --rm lbugdb/explorer:latest
+           --rm ghcr.io/ladybugdb/explorer:latest
 ```
 
 or,
@@ -146,7 +146,7 @@ podman run -p 8000:8000 \
            -v {path to the directory containing the database file}:/database \
            -e LBUG_FILE={database file name} \
            --userns=keep-id \
-           --rm lbugdb/explorer:latest
+           --rm ghcr.io/ladybugdb/explorer:latest
 ```
 
 Please refer to the official Podman docs for [mounting external volumes](https://docs.podman.io/en/latest/markdown/podman-run.1.html#mounting-external-volumes) and [user namespace mode](https://https://docs.podman.io/en/latest/markdown/podman-run.1.html#userns-mode) for more information.
@@ -237,7 +237,7 @@ docker build -t lbugdb/explorer:latest .
 docker run -p 8000:8000 \
            -v {path to the directory containing the database file}:/database \
            -e LBUG_FILE={database file name} \
-           --rm lbugdb/explorer:latest
+           --rm ghcr.io/ladybugdb/explorer:latest
 ```
 
 ## Deployment
