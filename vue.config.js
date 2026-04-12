@@ -1,7 +1,7 @@
 const { defineConfig } = require("@vue/cli-service");
 const path = require("path");
 const DUCKDB_DIST = path.dirname(require.resolve("@duckdb/duckdb-wasm"));
-const LBUGDB_WASM_DIST = path.dirname(require.resolve("@lbug/lbug-wasm"));
+const LBUGDB_WASM_DIST = path.dirname(require.resolve("@ladybugdb/wasm-core"));
 const configureAPI = require("./src/server/Configure");
 const MonacoWebpackPlugin = require("monaco-editor-webpack-plugin");
 const CopyWebpackPlugin = require("copy-webpack-plugin");

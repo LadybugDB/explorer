@@ -1,4 +1,4 @@
-import lbug from "@lbug/lbug-wasm";
+import lbug from "@ladybugdb/wasm-core";
 import { TABLE_TYPES } from "./Constants";
 
 // TODO: Refactor this and extract common logic between frontend WASM module

@@ -93,7 +93,7 @@ In in-memory mode, the database is stored in memory and all changes are lost whe
 
 #### WebAssembly mode
 
-In WebAssembly mode, Ladybug Explorer is launched with `@lbug/lbug-wasm`, which runs all the queries directly in browser. If you want to launch Ladybug Explorer in WebAssembly mode, you can do so by setting the `LBUG_WASM` environment variable to `true` as follows.
+In WebAssembly mode, Ladybug Explorer is launched with `@ladybugdb/wasm-core`, which runs all the queries directly in browser. If you want to launch Ladybug Explorer in WebAssembly mode, you can do so by setting the `LBUG_WASM` environment variable to `true` as follows.
 
 ```bash
 docker run -p 8000:8000 \

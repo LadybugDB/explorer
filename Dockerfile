@@ -33,7 +33,7 @@ WORKDIR /home/node/app
 # Done in one step to reduce image size
 RUN npm install &&\
     if [ "$SKIP_GRAMMAR" != "true" ] ; then npm run generate-grammar-prod ; else echo "Skipping grammar generation" ; fi &&\
-    rm -rf node_modules/lbug/prebuilt node_modules/lbug/lbug-source
+    rm -rf node_modules/@ladybugdb/core/prebuilt node_modules/@ladybugdb/core/lbug-source
 
 # Fetch datasets
 RUN if [ "$SKIP_DATASETS" != "true" ] ; then npm run fetch-datasets ; else echo "Skipping dataset fetch" ; fi
