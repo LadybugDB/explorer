@@ -24,7 +24,7 @@ if (process.env.NODE_ENV !== "production") {
   );
   lbug = require(lbugPath);
 } else {
-  lbug = require("lbug");
+  lbug = require("@ladybugdb/core");
 }
 const os = require("os");
 
@@ -260,7 +260,7 @@ class Database {
     const packagePath = path.join(__dirname, "..", "..", "..", "package.json");
     return fs.promises.readFile(packagePath, "utf8").then((data) => {
       const packageJson = JSON.parse(data);
-      return packageJson.dependencies.lbug;
+      return packageJson.dependencies["@ladybugdb/core"];
     });
   }
 

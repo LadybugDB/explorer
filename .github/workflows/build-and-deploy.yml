@@ -62,7 +62,7 @@ jobs:
       - name: Prebuild - get version
         shell: bash
         run: |
-          VERSION=$(node -e 'fs=require("fs");console.log(JSON.parse(fs.readFileSync("package.json")).dependencies.lbug)')
+          VERSION=$(node -e 'fs=require("fs");console.log(JSON.parse(fs.readFileSync("package.json"))["dependencies"]["@ladybugdb/core"])')
           echo "VERSION=$VERSION" >> $GITHUB_ENV
       - name: Prebuild - write version to file
         run: echo $VERSION > version.txt
@@ -93,7 +93,7 @@ jobs:
       - name: Get version
         shell: bash
         run: |
-          VERSION=$(node -e 'fs=require("fs");console.log(JSON.parse(fs.readFileSync("package.json")).dependencies.lbug)')
+          VERSION=$(node -e 'fs=require("fs");console.log(JSON.parse(fs.readFileSync("package.json"))["dependencies"]["@ladybugdb/core"])')
           echo "VERSION=$VERSION" >> $GITHUB_ENV
       - name: Set lowercase owner
         run: echo "OWNER=$(echo ${{ github.repository_owner }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV

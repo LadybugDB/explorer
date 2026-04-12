@@ -4,7 +4,7 @@ const exec = require("child_process").exec;
 const process = require("process");
 
 const PACKAGE_JSON_PATH = path.resolve(__dirname, "../package.json");
-const CMD = "npm view lbug@next version";
+const CMD = "npm view @ladybugdb/core@next version";
 
 (() => {
   exec(CMD, (error, stdout, _) => {
@@ -21,8 +21,8 @@ const CMD = "npm view lbug@next version";
         process.exit(1);
       }
       const packageJson = JSON.parse(data);
-      packageJson.dependencies.lbug = `${latestVersion}`;
-      packageJson.dependencies["@lbug/lbug-wasm"] = `${latestVersion}`;
+      packageJson.dependencies["@ladybugdb/core"] = `${latestVersion}`;
+      packageJson.dependencies["@ladybugdb/wasm-core"] = `${latestVersion}`;
       fs.writeFile(
         PACKAGE_JSON_PATH,
         JSON.stringify(packageJson, null, 2),
