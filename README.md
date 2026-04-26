@@ -151,6 +151,43 @@ podman run -p 8000:8000 \
 
 Please refer to the official Podman docs for [mounting external volumes](https://docs.podman.io/en/latest/markdown/podman-run.1.html#mounting-external-volumes) and [user namespace mode](https://https://docs.podman.io/en/latest/markdown/podman-run.1.html#userns-mode) for more information.
 
+## Switching databases at runtime
+
+The **DB** menu in the sidebar lets you switch the active database without restarting the server. Three modes are supported:
+
+- **File-based** — open a database file on the local filesystem
+- **In-memory** — temporary database; all data is lost on restart
+- **Remote (SSH)** — mount a database from a remote machine over SSH
+
+### Remote (SSH) mode
+
+SSH mode uses `sshfs` to mount the remote directory on the machine running Ladybug Explorer and opens the database from the mount point directly. Changes are written through to the remote machine in real time.
+
+**Requirements on the machine running Ladybug Explorer:**
+
+| Dependency | Required when | How to install |
+|---|---|---|
+| `sshfs` | Always for SSH mode | `sudo apt install sshfs` or `sudo dnf install fuse-sshfs` |
+| `/dev/fuse` | Always for SSH mode | Kernel FUSE module — present by default on most Linux systems |
+| `sshpass` | Password authentication only | `sudo apt install sshpass` or `sudo dnf install sshpass` |
+
+Private key authentication does not require `sshpass`.
+
+**Requirements on the remote machine:**
+
+Only an SSH daemon (`sshd`) is needed. No additional software is required.
+
+**When running via Docker**, grant the container access to FUSE:
+
+```bash
+docker run -p 8000:8000 \
+           --cap-add SYS_ADMIN \
+           --device /dev/fuse \
+           --rm lbugdb/explorer:latest
+```
+
+`sshfs` and (if using password auth) `sshpass` must also be present inside the container image.
+
 ## Documentation
 
 For more information regarding launching and using Ladybug Explorer, please refer to the [documentation](https://docs.ladybugdb.com/visualization/lbug-explorer/).
