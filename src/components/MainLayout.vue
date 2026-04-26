@@ -57,6 +57,19 @@
             <hr>
           </li>
 
+          <li
+            v-if="!modeStore.isWasm"
+            class="nav-item"
+          >
+            <a
+              aria-hidden="true"
+              href="#db"
+              @click.prevent="showDBModal()"
+            >
+              <i class="fa-solid fa-database" />
+              <span class="hide-on-collapse">DB</span>
+            </a>
+          </li>
           <li :class="['nav-item', { active: showShell }]">
             <a
               aria-hidden="true"
@@ -183,6 +196,11 @@
       </div>
     </div>
 
+    <DBConfigModal
+      ref="dbConfigModal"
+      @reload-schema="reloadSchema"
+    />
+
     <div
       ref="modal"
       class="modal"
@@ -262,6 +280,7 @@ import ShellMainView from "./ShellView/ShellMainView.vue";
 import SettingsMainView from "./SettingsView/SettingsMainView.vue"
 import DatasetMainView from "./DatasetView/DatasetMainView.vue"
 import ImporterMainView from "./ImporterView/ImporterMainView.vue";
+import DBConfigModal from "./DBView/DBConfigModal.vue";
 import Axios from "@/utils/AxiosWrapper";
 import { useSettingsStore } from "../store/SettingsStore";
 import { useModeStore } from "../store/ModeStore";
@@ -279,6 +298,7 @@ export default {
     SettingsMainView,
     DatasetMainView,
     ImporterMainView,
+    DBConfigModal,
   },
   data: () => ({
     accessModeModal: null,
@@ -510,6 +530,9 @@ export default {
       this.$nextTick(() => {
         this.$refs.settings.showModal();
       });
+    },
+    showDBModal() {
+      this.$refs.dbConfigModal.showModal();
     },
     toggleSidebar() {
       this.isSidebarCollapsed = !this.isSidebarCollapsed;

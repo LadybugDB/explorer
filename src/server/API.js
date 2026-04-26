@@ -20,11 +20,13 @@ if (!isWasmMode) {
     const importApi = require("./Import");
     const gpt = require("./Gpt");
 
+    const dbConfig = require("./DBConfig");
     router.use("/schema", schema);
     router.use("/cypher", cypher);
     router.use("/session", session);
     router.use("/", state);
     router.use("/gpt", gpt);
+    router.use("/db", dbConfig);
     if (currentMode === MODES.READ_WRITE) {
         router.use("/reset", reset);
         router.use("/import", importApi);
