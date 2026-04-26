@@ -165,13 +165,25 @@ SSH mode uses `sshfs` to mount the remote directory on the machine running Ladyb
 
 **Requirements on the machine running Ladybug Explorer:**
 
+*Linux*
+
 | Dependency | Required when | How to install |
 |---|---|---|
 | `sshfs` | Always for SSH mode | `sudo apt install sshfs` or `sudo dnf install fuse-sshfs` |
-| `/dev/fuse` | Always for SSH mode | Kernel FUSE module — present by default on most Linux systems |
-| `sshpass` | Password authentication only | `sudo apt install sshpass` or `sudo dnf install sshpass` |
+| `/dev/fuse` | Always for SSH mode | Kernel FUSE module — present by default on most distributions |
+| `sshpass` | Password auth only | `sudo apt install sshpass` or `sudo dnf install sshpass` |
 
-Private key authentication does not require `sshpass`.
+*macOS*
+
+macOS does not include FUSE support by default. Install [macFUSE](https://osxfuse.github.io/) first, then allow its kernel extension in **System Settings → Privacy & Security** (a reboot may be required). On Apple Silicon, disabling SIP may additionally be needed — see the [macFUSE FAQ](https://github.com/osxfuse/osxfuse/wiki/FAQ).
+
+```bash
+brew install --cask macfuse
+brew install gromgit/fuse/sshfs-mac          # sshfs
+brew install hudochenkov/sshpass/sshpass     # only needed for password auth
+```
+
+Private key authentication does not require `sshpass` on any platform.
 
 **Requirements on the remote machine:**
 
