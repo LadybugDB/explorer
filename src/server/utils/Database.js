@@ -185,6 +185,41 @@ class Database {
       });
   }
 
+  getCurrentConfig() {
+    const isInMemory = this.dbPath === ":memory:";
+    return {
+      dbPath: this.dbPath,
+      isInMemory,
+      dbDir: isInMemory ? "" : path.dirname(this.dbPath),
+      dbFile: isInMemory ? "" : path.basename(this.dbPath),
+    };
+  }
+
+  async reconfigure({ dbDir, dbFile, inMemory }) {
+    const isAllConnectionsReleased = this.connectionPool.every(
+      (conn) => conn.useCount === 0
+    );
+    if (!isAllConnectionsReleased) {
+      throw new Error("Please make sure no queries are running before reconfiguring.");
+    }
+    const oldConnectionPool = this.connectionPool;
+    const oldDb = this.db;
+    this.connectionPool = [];
+    this.db = null;
+    await Promise.all(oldConnectionPool.map((conn) => conn.connection.close()));
+    oldDb.close();
+    if (inMemory) {
+      this.dbPath = ":memory:";
+    } else {
+      if (!dbDir) {
+        throw new Error("dbDir is required for file-based mode.");
+      }
+      const fileName = dbFile || "database.kz";
+      this.dbPath = path.resolve(path.join(dbDir, fileName));
+    }
+    this.init();
+  }
+
   async getSchema() {
     const conn = this.getConnection();
     try {
