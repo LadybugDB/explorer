@@ -10,14 +10,16 @@
           <h2>Database</h2>
           <hr>
 
+          <!-- Current connection summary -->
           <div
             v-if="currentConfig"
             class="db-current"
           >
             <span class="db-label">Current</span>
-            <code class="db-path">{{ currentConfig.isInMemory ? 'In-memory' : currentConfig.dbPath }}</code>
+            <code class="db-path">{{ currentSummary }}</code>
           </div>
 
+          <!-- Mode selection -->
           <div class="db-options">
             <label class="db-option-card">
               <input
@@ -25,9 +27,7 @@
                 type="radio"
                 value="file"
               >
-              <span>
-                <i class="fa-solid fa-hard-drive" />&nbsp; File-based
-              </span>
+              <span><i class="fa-solid fa-hard-drive" />&nbsp; File-based</span>
             </label>
             <label class="db-option-card">
               <input
@@ -35,12 +35,19 @@
                 type="radio"
                 value="memory"
               >
-              <span>
-                <i class="fa-solid fa-memory" />&nbsp; In-memory
-              </span>
+              <span><i class="fa-solid fa-memory" />&nbsp; In-memory</span>
+            </label>
+            <label class="db-option-card">
+              <input
+                v-model="mode"
+                type="radio"
+                value="ssh"
+              >
+              <span><i class="fa-solid fa-server" />&nbsp; Remote (SSH)</span>
             </label>
           </div>
 
+          <!-- File-based fields -->
           <div
             v-if="mode === 'file'"
             class="db-fields"
@@ -65,12 +72,129 @@
             </div>
           </div>
 
+          <!-- In-memory info -->
           <div
-            v-if="mode === 'memory'"
+            v-else-if="mode === 'memory'"
             class="db-info-text"
           >
             <i class="fa-solid fa-circle-info" />&nbsp;
             Data will not be persisted. All changes are lost when the server restarts.
+          </div>
+
+          <!-- SSH fields -->
+          <div
+            v-else-if="mode === 'ssh'"
+            class="db-fields"
+          >
+            <div class="db-ssh-section-label">
+              Connection
+            </div>
+            <div class="db-field-row">
+              <label>Host</label>
+              <input
+                v-model="ssh.host"
+                type="text"
+                class="form-control db-input"
+                placeholder="192.168.1.100 or hostname"
+              >
+            </div>
+            <div class="db-field-row">
+              <label>Port</label>
+              <input
+                v-model.number="ssh.port"
+                type="number"
+                class="form-control db-input db-input--short"
+                placeholder="22"
+                min="1"
+                max="65535"
+              >
+            </div>
+            <div class="db-field-row">
+              <label>User</label>
+              <input
+                v-model="ssh.user"
+                type="text"
+                class="form-control db-input"
+                placeholder="username"
+              >
+            </div>
+
+            <div class="db-ssh-section-label db-ssh-section-label--mt">
+              Authentication
+            </div>
+            <div class="db-field-row">
+              <label>Auth type</label>
+              <div class="db-auth-options">
+                <label class="db-auth-option">
+                  <input
+                    v-model="ssh.authType"
+                    type="radio"
+                    value="password"
+                  >
+                  Password
+                </label>
+                <label class="db-auth-option">
+                  <input
+                    v-model="ssh.authType"
+                    type="radio"
+                    value="key"
+                  >
+                  Private key file
+                </label>
+              </div>
+            </div>
+            <div
+              v-if="ssh.authType === 'password'"
+              class="db-field-row"
+            >
+              <label>Password</label>
+              <input
+                v-model="ssh.password"
+                type="password"
+                class="form-control db-input"
+                placeholder="SSH password"
+                autocomplete="current-password"
+              >
+            </div>
+            <div
+              v-else
+              class="db-field-row"
+            >
+              <label>Key file</label>
+              <input
+                v-model="ssh.privateKeyPath"
+                type="text"
+                class="form-control db-input"
+                placeholder="/home/user/.ssh/id_rsa"
+              >
+            </div>
+
+            <div class="db-ssh-section-label db-ssh-section-label--mt">
+              Remote database
+            </div>
+            <div class="db-field-row">
+              <label>Directory</label>
+              <input
+                v-model="ssh.remoteDir"
+                type="text"
+                class="form-control db-input"
+                placeholder="/path/to/database/directory"
+              >
+            </div>
+            <div class="db-field-row">
+              <label>File name</label>
+              <input
+                v-model="ssh.remoteFile"
+                type="text"
+                class="form-control db-input"
+                placeholder="database.kz"
+              >
+            </div>
+            <div class="db-info-text db-info-text--mt">
+              <i class="fa-solid fa-circle-info" />&nbsp;
+              Requires <code>sshfs</code> on the server.
+              Password auth additionally requires <code>sshpass</code>.
+            </div>
           </div>
 
           <div
@@ -112,6 +236,17 @@
 import { Modal } from 'bootstrap';
 import Axios from "@/utils/AxiosWrapper";
 
+const defaultSSH = () => ({
+  host: "",
+  port: 22,
+  user: "",
+  authType: "password",
+  password: "",
+  privateKeyPath: "",
+  remoteDir: "",
+  remoteFile: "",
+});
+
 export default {
   name: "DBConfigModal",
   emits: ["reload-schema"],
@@ -121,9 +256,21 @@ export default {
     mode: "file",
     dbDir: "",
     dbFile: "",
+    ssh: defaultSSH(),
     isApplying: false,
     errorMessage: "",
   }),
+  computed: {
+    currentSummary() {
+      if (!this.currentConfig) return "";
+      const { mode, ssh, isInMemory, dbPath } = this.currentConfig;
+      if (mode === "ssh" && ssh) {
+        return `${ssh.user}@${ssh.host}:${ssh.remoteDir}`;
+      }
+      if (isInMemory) return "In-memory";
+      return dbPath;
+    },
+  },
   mounted() {
     this.modal = new Modal(this.$refs.modal);
     this.$refs.modal.addEventListener("hidden.bs.modal", this.onHide);
@@ -138,10 +285,15 @@ export default {
       try {
         const res = await Axios.get("/api/db");
         this.currentConfig = res.data;
-        this.mode = res.data.isInMemory ? "memory" : "file";
+        this.mode = res.data.mode || (res.data.isInMemory ? "memory" : "file");
         this.dbDir = res.data.dbDir || "";
         this.dbFile = res.data.dbFile || "";
-      } catch (err) {
+        // Pre-populate SSH fields (password is never returned from server)
+        const s = res.data.ssh;
+        this.ssh = s
+          ? { ...defaultSSH(), host: s.host, port: s.port, user: s.user, authType: s.authType, remoteDir: s.remoteDir, privateKeyPath: s.privateKeyPath || "" }
+          : defaultSSH();
+      } catch {
         this.currentConfig = null;
       }
       this.modal.show();
@@ -153,14 +305,33 @@ export default {
       this.errorMessage = "";
       this.isApplying = false;
     },
+    buildPayload() {
+      if (this.mode === "memory") {
+        return { mode: "memory" };
+      }
+      if (this.mode === "ssh") {
+        const s = this.ssh;
+        const sshPayload = {
+          host: s.host,
+          port: s.port || 22,
+          user: s.user,
+          remoteDir: s.remoteDir,
+          remoteFile: s.remoteFile || "database.kz",
+        };
+        if (s.authType === "password") {
+          sshPayload.password = s.password;
+        } else {
+          sshPayload.privateKeyPath = s.privateKeyPath;
+        }
+        return { mode: "ssh", ssh: sshPayload };
+      }
+      return { mode: "file", dbDir: this.dbDir, dbFile: this.dbFile || "database.kz" };
+    },
     async apply() {
       this.errorMessage = "";
       this.isApplying = true;
       try {
-        const payload = this.mode === "memory"
-          ? { inMemory: true }
-          : { dbDir: this.dbDir, dbFile: this.dbFile || "database.kz", inMemory: false };
-        await Axios.post("/api/db", payload);
+        await Axios.post("/api/db", this.buildPayload());
         this.$emit("reload-schema");
         this.hideModal();
       } catch (err) {
@@ -218,6 +389,7 @@ export default {
   display: flex;
   gap: 1rem;
   margin-bottom: 1.5rem;
+  flex-wrap: wrap;
 }
 
 .db-option-card {
@@ -242,6 +414,19 @@ export default {
   gap: 0.75rem;
 }
 
+.db-ssh-section-label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--bs-body-inactive);
+  padding-top: 0.25rem;
+
+  &--mt {
+    margin-top: 0.5rem;
+  }
+}
+
 .db-field-row {
   display: flex;
   align-items: center;
@@ -261,12 +446,43 @@ export default {
   color: var(--bs-body-text);
   font-size: 0.875rem;
   border-radius: 0.5rem;
+
+  &--short {
+    max-width: 100px;
+  }
+}
+
+.db-auth-options {
+  display: flex;
+  gap: 1.5rem;
+}
+
+.db-auth-option {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.875rem;
+  font-weight: 300;
+  cursor: pointer;
+
+  input[type="radio"] {
+    accent-color: var(--bs-body-bg-accent);
+  }
 }
 
 .db-info-text {
   font-size: 0.875rem;
   color: var(--bs-body-inactive);
   padding: 0.5rem 0;
+
+  &--mt {
+    margin-top: 0.25rem;
+  }
+
+  code {
+    font-size: 0.8rem;
+    color: var(--bs-body-text);
+  }
 }
 
 .db-error {
