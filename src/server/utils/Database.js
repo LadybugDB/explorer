@@ -48,9 +48,9 @@ class Database {
     } else {
       let dbFileName = process.env.LBUG_FILE;
       if (!dbFileName) {
-        dbFileName = "database.kz";
+        dbFileName = "database.lbdb";
         logger.warn(
-          "LBUG_FILE environment variable not set, using default database file name: database.kz"
+          "LBUG_FILE environment variable not set, using default database file name: database.lbdb"
         );
       } else {
         logger.info(`Using database file: ${dbFileName}`);
