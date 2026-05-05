@@ -201,7 +201,7 @@
           <div class="modal-body">
             <div v-if="modeStore.isDemo">
               <p>
-                This WebAssembly-powered demo of <a href="https://kuzudb.com/">Ladybug</a> lets you import and query graph
+                This WebAssembly-powered demo of <a href="https://ladybugdb.com/">Ladybug</a> lets you import and query graph
                 data using
                 <a
                   href="https://docs.ladybugdb.com/cypher/"
@@ -210,10 +210,7 @@
                 See the <a
                   href="https://docs.ladybugdb.com/visualization/lbug-explorer/"
                   target="_blank"
-                >docs</a> or <a
-                  href="https://www.youtube.com/watch?v=yKcVV_bhBTo"
-                  target="_blank"
-                >video tutorial</a> for help.
+                >docs</a> for help.
                 <br><br>
                 Note: Data is not saved between sessions.
               </p>
