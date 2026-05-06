@@ -21,7 +21,7 @@
     "@popperjs/core": "^2.11.8",
     "antlr4-c3": "3.2.3",
     "antlr4ng": "1.0.7",
-    "axios": "^1.4.0",
+    "axios": "^1.15.2",
     "bootstrap": "^5.3.1",
     "chroma-js": "^3.0.0",
     "core-js": "^3.8.3",
@@ -60,7 +60,7 @@
     "sass": "^1.66.1",
     "sass-loader": "^13.3.2",
     "typescript": "^5.2.2",
-    "webpack": "^5.88.2"
+    "webpack": "^5.106.2"
   },
   "eslintConfig": {
     "root": true,
