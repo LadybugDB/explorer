@@ -8,6 +8,8 @@
             ref="dropzone"
             for="files"
             class="dropzone-container"
+            @dragover.prevent
+            @drop.prevent="handleDrop"
           >
             <div class="file-icon"><i class="fa-solid fa-file-circle-plus text-[(var(--bs-body-bg-accent))]" /></div>
             <div class="d-flex flex-column align-items-center text-center pt-3 px-5">
@@ -48,38 +50,15 @@
 </template>
 
 <script lang="js">
-import Dropzone from "dropzone";
-
 export default {
   name: "ImporterViewDropZone",
   emits: ["filesSelected", "loadBundledDataset"],
-  data() {
-    return {
-      dropzone: null,
-    };
-  },
-
-  mounted() {
-    this.dropzone = new Dropzone(this.$refs.dropzone, {
-      url: "/",
-      autoProcessQueue: false,
-      uploadMultiple: true,
-      disablePreviews: true,
-    });
-    this.dropzone.on("drop", (e) => {
-      e.preventDefault();
-      const files = e.dataTransfer.files;
-      this.$emit("filesSelected", files);
-    });
-  },
-
-  beforeUnmount() {
-    this.dropzone.destroy();
-  },
-
   methods: {
     selectFiles() {
       this.$refs.fileInput.click();
+    },
+    handleDrop(e) {
+      this.$emit("filesSelected", e.dataTransfer.files);
     },
     handleFilesSelected(e) {
       const files = e.target.files;

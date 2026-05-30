@@ -1,5 +1,24 @@
-import Moment from "moment";
 import { DATA_TYPES } from "./Constants";
+
+function padDatePart(value) {
+  return value.toString().padStart(2, "0");
+}
+
+function formatDateUtc(value) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return value;
+  }
+  return `${date.getUTCFullYear()}-${padDatePart(date.getUTCMonth() + 1)}-${padDatePart(date.getUTCDate())}`;
+}
+
+function formatTimestampUtc(value) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return value;
+  }
+  return date.toISOString();
+}
 
 class ValueFormatter {
   constructor() {
@@ -53,13 +72,9 @@ class ValueFormatter {
 
   beautifyValue(value, type) {
     if (type === DATA_TYPES.DATE) {
-      const moment = Moment(value);
-      moment.utc();
-      return moment.format("YYYY-MM-DD");
+      return formatDateUtc(value);
     } else if (type === DATA_TYPES.TIMESTAMP) {
-      const moment = Moment(value);
-      moment.utc();
-      return moment.format();
+      return formatTimestampUtc(value);
     } else if (type === DATA_TYPES.FLOAT || type === DATA_TYPES.DOUBLE) {
       const number = Number.parseFloat(value);
       if (isNaN(number)) {

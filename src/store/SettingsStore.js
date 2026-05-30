@@ -1,5 +1,4 @@
 import { defineStore } from "pinia";
-import chroma from 'chroma-js';
 import Axios from "@/utils/AxiosWrapper";
 import {
   SHOW_REL_LABELS_OPTIONS,
@@ -23,9 +22,10 @@ const COLOR_PALETTE = [
 ];
 
 function randomChromaColor() {
-  const randomSaturation = Math.random() * 0.2 + 0.6;  //Sets saturation to a random value between 0.6 and 0.8
-  const randomLightness = Math.random() * 0.2 + 0.6;   //Sets lightness to a random value between 0.6 and 0.8
-  return chroma.random().set('hsl.s', randomSaturation).set('hsl.l', randomLightness).hex();
+  const hue = Math.floor(Math.random() * 360);
+  const saturation = Math.floor((Math.random() * 0.2 + 0.6) * 100);
+  const lightness = Math.floor((Math.random() * 0.2 + 0.6) * 100);
+  return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
 }
 
 const NULL_COLOR = "#d9d9d9";

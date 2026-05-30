@@ -216,7 +216,7 @@ import { useSettingsStore } from "../../store/SettingsStore";
 import { mapStores } from 'pinia'
 import SchemaPropertyEditCell from "./SchemaPropertyEditCell.vue";
 import { DATA_TYPES, PLACEHOLDER_NODE_TABLE, PLACEHOLDER_REL_TABLE } from "../../utils/Constants";
-import { v4 as uuidv4 } from "uuid";
+import { uuidv4 } from "@/utils/UniqueId";
 export default {
   name: "SchemaSidebarAddView",
   components: {

@@ -1,10 +1,22 @@
-const pino = require("pino");
-const logger = pino({
-  transport: {
-    target: "pino-pretty",
-    options: {
-      colorize: true,
-    },
+function log(level, message) {
+  const output = `[${new Date().toISOString()}] ${level}: ${message}`;
+  if (level === "error") {
+    console.error(output);
+  } else if (level === "warn") {
+    console.warn(output);
+  } else {
+    console.log(output);
+  }
+}
+
+module.exports = {
+  info(message) {
+    log("info", message);
   },
-});
-module.exports = logger;
+  warn(message) {
+    log("warn", message);
+  },
+  error(message) {
+    log("error", message);
+  },
+};

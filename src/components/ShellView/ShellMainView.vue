@@ -35,7 +35,7 @@
 
 <script lang="js">
 import ShellCell from "./ShellCell.vue";
-import { v4 as uuidv4 } from 'uuid';
+import { uuidv4 } from "@/utils/UniqueId";
 import Axios from "@/utils/AxiosWrapper";
 import { MODES } from "@/utils/Constants";
 export default {

@@ -1,195 +1,141 @@
 const path = require("path");
 const fs = require("fs").promises;
-const sqlite3 = require("sqlite3");
-const sqlite = require("sqlite");
+const fsConstants = require("fs").constants;
 const constants = require("./Constants");
 
 const MODES = constants.MODES;
-const DB_FILE_NAME = "explorer.db";
+const DB_FILE_NAME = "explorer-session.json";
 
 class SessionDatabase {
   constructor() {
     this.isInitialized = false;
+    this.data = {
+      settings: {},
+      history: [],
+    };
+
     const dbPath = process.env.LBUG_DIR;
     if (!dbPath) {
       return;
     }
+
     this.dbPath = path.resolve(path.join(dbPath, DB_FILE_NAME));
     this.isReadOnly = !!(
       process.env.MODE && process.env.MODE !== MODES.READ_WRITE
     );
-    this.initSqlite();
+    this.init();
   }
 
-  initSqlite() {
+  init() {
     if (this.isInitialized) {
       return null;
     }
-    if (this.sqlInitPromise) {
-      return this.sqlInitPromise;
+    if (this.initPromise) {
+      return this.initPromise;
     }
-    this.sqlInitPromise = (async () => {
-      let isDbFileExists = false;
+    this.initPromise = (async () => {
+      let fileExists = false;
       try {
-        await fs.access(this.dbPath, fs.constants.R_OK);
-        isDbFileExists = true;
+        const content = await fs.readFile(this.dbPath, "utf-8");
+        fileExists = true;
+        if (content.trim()) {
+          this.data = JSON.parse(content);
+          this.data.settings = this.data.settings || {};
+          this.data.history = Array.isArray(this.data.history) ? this.data.history : [];
+        }
       } catch (err) {
-        // File does not exist
-      }
-      if (isDbFileExists) {
-        if (!this.isReadOnly) {
-          // Double check if the file is writable if we are not in read-only
-          // mode. This will help us to detect if the file is read-only due to
-          // file permissions.
-          try {
-            await fs.access(this.dbPath, fs.constants.W_OK);
-          } catch (err) {
-            this.isReadOnly = true;
-          }
-        }
-      } else {
-        if (this.isReadOnly) {
-          // In read-only mode, if the db file does not exist, we should not
-          // create it.
-          return;
-        }
-        try {
-          await new Promise((resolve, reject) => {
-            const newDb = new sqlite3.Database(
-              this.dbPath,
-              sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE,
-              (err) => {
-                if (err) {
-                  return reject(err);
-                }
-                newDb.close();
-                resolve();
-              }
-            );
-          });
-        } catch (err) {
+        if (err.code !== "ENOENT") {
           this.isReadOnly = true;
           return;
         }
       }
-      this.db = await sqlite.open({
-        filename: this.dbPath,
-        driver: sqlite3.Database,
-        mode: this.isReadOnly ? sqlite3.OPEN_READONLY : sqlite3.OPEN_READWRITE,
-      });
-      if (!isDbFileExists) {
-        await this.createDbSchema();
+
+      if (fileExists && !this.isReadOnly) {
+        try {
+          await fs.access(this.dbPath, fsConstants.W_OK);
+        } catch (_) {
+          this.isReadOnly = true;
+        }
       }
+
+      if (!fileExists && !this.isReadOnly) {
+        try {
+          await this.persist();
+        } catch (_) {
+          this.isReadOnly = true;
+          return;
+        }
+      }
+
       this.isInitialized = true;
-      delete this.sqlInitPromise;
+      delete this.initPromise;
     })();
-    return this.sqlInitPromise;
+    return this.initPromise;
   }
 
   isWritable() {
     return this.isInitialized && !this.isReadOnly;
   }
 
-  async createDbSchema() {
-    await this.db.exec(`
-      CREATE TABLE settings (
-        key TEXT PRIMARY KEY,
-        value TEXT
-      );
-    `);
-    await this.db.exec(`
-      CREATE TABLE history (
-        uuid TEXT PRIMARY KEY,
-        isQueryGenerationMode BOOLEAN,
-        gptQuestion TEXT,
-        cypherQuery TEXT
-    );`);
+  async persist() {
+    await fs.mkdir(path.dirname(this.dbPath), { recursive: true });
+    await fs.writeFile(this.dbPath, JSON.stringify(this.data, null, 2));
   }
 
   async getSetting(key = "allSettings") {
-    await this.initSqlite();
+    await this.init();
     if (!this.isInitialized) {
       return {};
     }
-    let settings = await this.db.get(
-      "SELECT * FROM settings WHERE key = ?",
-      key
-    );
-    settings = settings ? settings.value : {};
-    return settings;
+    return this.data.settings[key] || {};
   }
 
   async setSetting(value, key = "allSettings") {
-    await this.initSqlite();
+    await this.init();
     if (!this.isWritable()) {
       return;
     }
-    await this.db.run(
-      `INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)`,
-      key,
-      JSON.stringify(value)
-    );
+    this.data.settings[key] = value;
+    await this.persist();
   }
 
   async upsertHistoryItem(historyItem) {
-    await this.initSqlite();
+    await this.init();
     if (!this.isWritable()) {
       return;
     }
-    await this.db.run("BEGIN TRANSACTION;");
-    try {
-      let { uuid, isQueryGenerationMode, gptQuestion, cypherQuery } =
-        historyItem;
-      const currentRow = await this.db.get(
-        "SELECT * FROM history WHERE uuid = ?",
-        uuid
-      );
-      if (!currentRow) {
-        await this.db.run(
-          "INSERT INTO history (uuid, isQueryGenerationMode, gptQuestion, cypherQuery) VALUES (?, ?, ?, ?)",
-          uuid,
-          isQueryGenerationMode,
-          gptQuestion,
-          cypherQuery
-        );
-      } else {
-        if (!gptQuestion) {
-          gptQuestion = currentRow.gptQuestion;
-        }
-        if (!cypherQuery) {
-          cypherQuery = currentRow.cypherQuery;
-        }
-        await this.db.run(
-          "UPDATE history SET isQueryGenerationMode = ?, gptQuestion = ?, cypherQuery = ? WHERE uuid = ?",
-          isQueryGenerationMode,
-          gptQuestion,
-          cypherQuery,
-          uuid
-        );
-      }
-      await this.db.run("COMMIT;");
-    } catch (err) {
-      await this.db.run("ROLLBACK;");
+    const index = this.data.history.findIndex((item) => item.uuid === historyItem.uuid);
+    if (index === -1) {
+      this.data.history.unshift(historyItem);
+    } else {
+      const current = this.data.history[index];
+      this.data.history[index] = {
+        ...current,
+        ...historyItem,
+        gptQuestion: historyItem.gptQuestion || current.gptQuestion,
+        cypherQuery: historyItem.cypherQuery || current.cypherQuery,
+      };
+      const [item] = this.data.history.splice(index, 1);
+      this.data.history.unshift(item);
     }
+    await this.persist();
   }
 
   async deleteHistoryItem(uuid) {
-    await this.initSqlite();
+    await this.init();
     if (!this.isWritable()) {
       return;
     }
-    await this.db.run("DELETE FROM history WHERE uuid = ?", uuid);
+    this.data.history = this.data.history.filter((item) => item.uuid !== uuid);
+    await this.persist();
   }
 
   async getHistoryItems() {
-    await this.initSqlite();
+    await this.init();
     if (!this.isInitialized) {
       return [];
     }
-    const historyItems = await this.db.all(
-      "SELECT *, rowid FROM history ORDER BY rowid DESC"
-    );
-    return historyItems;
+    return this.data.history;
   }
 }
 
