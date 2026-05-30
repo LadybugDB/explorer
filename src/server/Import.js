@@ -1,9 +1,8 @@
 const express = require("express");
 const router = express.Router();
 const path = require("path");
-const multer = require("multer");
+const fs = require("fs/promises");
 const database = require("./utils/Database");
-const uuid = require("uuid");
 const DataImportUtils = require("../utils/DataImport");
 const DataImportFsUtils = require("./utils/DataImportFs");
 const Constants = require("./utils/Constants");
@@ -11,25 +10,15 @@ const JOB_STATUS = Constants.JOB_STATUS;
 const IMPORT_ACTIONS = Constants.IMPORT_ACTIONS;
 const ddl = require("../utils/DataDefinitionLanguage");
 
-
 const jobsMap = new Map();
 
-const storage = multer.diskStorage({
-  destination: function (req, _, cb) {
-    const jobId = req.params.job_id;
-    const tmpDirPath = DataImportFsUtils.getTmpPath(jobId);
-    cb(null, tmpDirPath);
-  },
-  filename: function (req, _, cb) {
-    cb(null, req.params.file_name);
-  },
-});
-
-const upload = multer({ storage });
+function isValidUuid(value) {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
+}
 
 router.post("/:job_id", async (req, res) => {
   const jobId = req.params.job_id;
-  if (!jobId || !uuid.validate(jobId)) {
+  if (!jobId || !isValidUuid(jobId)) {
     return res.status(400).send({
       success: false,
       errors: ["Missing or invalid job ID"]
@@ -76,7 +65,7 @@ router.post("/:job_id", async (req, res) => {
 
 router.post("/:job_id/exec", async (req, res) => {
   const jobId = req.params.job_id;
-  if (!jobId || !uuid.validate(jobId)) {
+  if (!jobId || !isValidUuid(jobId)) {
     return res.status(400).send({ error: "Missing or invalid job ID" });
   }
   const job = jobsMap.get(jobId);
@@ -156,10 +145,13 @@ router.post("/:job_id/exec", async (req, res) => {
   }
 });
 
-router.post("/:job_id/:file_name", upload.single("file"), async (req, res) => {
+router.post("/:job_id/:file_name", express.raw({
+  type: "application/octet-stream",
+  limit: "2gb",
+}), async (req, res) => {
   const jobId = req.params.job_id;
   const fileName = req.params.file_name;
-  if (!jobId || !uuid.validate(jobId)) {
+  if (!jobId || !isValidUuid(jobId)) {
     return res.status(400).send({ error: "Missing or invalid job ID" });
   }
   if (!fileName) {
@@ -171,6 +163,13 @@ router.post("/:job_id/:file_name", upload.single("file"), async (req, res) => {
   }
   for (const step of job.plan) {
     if (step.action === IMPORT_ACTIONS.UPLOAD && step.fileName === fileName) {
+      const tmpDirPath = DataImportFsUtils.getTmpPath(jobId);
+      const filePath = path.join(tmpDirPath, fileName);
+      try {
+        await fs.writeFile(filePath, req.body);
+      } catch (err) {
+        return res.status(500).send({ error: "Error writing uploaded file" });
+      }
       step.status = JOB_STATUS.SUCCESS;
       return res.status(200).send({ success: true });
     }
@@ -180,7 +179,7 @@ router.post("/:job_id/:file_name", upload.single("file"), async (req, res) => {
 
 router.get("/:job_id", async (req, res) => {
   const jobId = req.params.job_id;
-  if (!jobId || !uuid.validate(jobId)) {
+  if (!jobId || !isValidUuid(jobId)) {
     return res.status(400).send({ error: "Missing or invalid job ID" });
   }
   const job = jobsMap.get(jobId);

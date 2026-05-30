@@ -1,5 +1,4 @@
 const express = require("express");
-const cors = require("cors");
 const api = require("./API");
 const path = require("path");
 const process = require("process");
@@ -23,7 +22,12 @@ process.on("SIGTERM", () => {
 
 const app = express();
 if (CROSS_ORIGIN) {
-  app.use(cors());
+  app.use((_, res, next) => {
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    res.setHeader("Access-Control-Allow-Methods", "GET, POST, DELETE, OPTIONS");
+    next();
+  });
   logger.info("CORS enabled for all origins");
 }
 const PORT = process.env.PORT ? parseInt(process.env.PORT) : 8000;

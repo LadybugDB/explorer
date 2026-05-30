@@ -102,7 +102,7 @@
 
 <script lang="js">
 import Axios from "@/utils/AxiosWrapper";
-import { v4 as uuidv4 } from 'uuid';
+import { uuidv4 } from "@/utils/UniqueId";
 import { mapStores } from 'pinia';
 import { useModeStore } from '../../store/ModeStore';
 import { DATA_TYPES, IMPORT_ACTIONS, JOB_STATUS } from '../../utils/Constants';
@@ -791,11 +791,9 @@ export default {
         try {
           if (!this.modeStore.isWasm) {
             const api = `/api/import/${this.currentJob.jobId}/${virtualFileName}`;
-            const formData = new FormData();
-            formData.append('file', file.file);
-            await Axios.post(api, formData, {
+            await Axios.post(api, file.file, {
               headers: {
-                'Content-Type': 'multipart/form-data',
+                'Content-Type': 'application/octet-stream',
               }
             });
           } else {

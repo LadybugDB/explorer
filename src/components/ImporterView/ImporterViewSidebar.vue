@@ -2,6 +2,8 @@
   <div
     ref="sidebar"
     class="importer-sidebar"
+    @dragover.prevent
+    @drop.prevent="handleDrop"
   >
     <button
       class="importer-sidebar__btn"
@@ -127,7 +129,6 @@
 </template>
 
 <script lang="js">
-import Dropzone from "dropzone";
 import { Modal } from 'bootstrap';
 export default {
   name: "ImporterViewSidebar",
@@ -152,17 +153,6 @@ export default {
   mounted() {
     this.modal = new Modal(this.$refs.modal);
     this.$refs.modal.addEventListener("hidden.bs.modal", this.cancelFileRemoval);
-    this.dropzone = new Dropzone(this.$refs.sidebar, {
-      url: "/",
-      autoProcessQueue: false,
-      uploadMultiple: true,
-      disablePreviews: true,
-    });
-    this.dropzone.on("drop", (e) => {
-      e.preventDefault();
-      const files = e.dataTransfer.files;
-      this.$emit("dropFiles", files);
-    });
   },
   beforeUnmount() {
     this.modal.dispose();
@@ -193,6 +183,9 @@ export default {
     },
     setCsvFormat(file) {
       this.$emit("setCsvFormat", file);
+    },
+    handleDrop(e) {
+      this.$emit("dropFiles", e.dataTransfer.files);
     },
     hideModal() {
       this.modal.hide();
