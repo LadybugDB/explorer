@@ -1,4 +1,4 @@
-const { execSync } = require("child_process");
+const { execFileSync } = require("child_process");
 const fs = require("fs");
 const path = require("path");
 const os = require("os");
@@ -32,35 +32,46 @@ class SSHManager {
 
   _hasCmd(cmd) {
     try {
-      execSync(`which ${cmd}`, { stdio: "pipe" });
+      execFileSync("which", [cmd], { stdio: "pipe" });
       return true;
     } catch {
       return false;
     }
   }
 
+  _validateConfig({ host, port, user, password, privateKeyPath, remoteDir }) {
+    if (!host || !user || !remoteDir) {
+      throw new Error("host, user, and remoteDir are required.");
+    }
+    const numericPort = Number(port);
+    if (!Number.isInteger(numericPort) || numericPort < 1 || numericPort > 65535) {
+      throw new Error("port must be an integer between 1 and 65535.");
+    }
+    if (!password && !privateKeyPath) {
+      throw new Error("Either password or privateKeyPath is required.");
+    }
+    return numericPort;
+  }
+
   mount({ host, port = 22, user, password, privateKeyPath, remoteDir }) {
+    const numericPort = this._validateConfig({ host, port, user, password, privateKeyPath, remoteDir });
     if (!this._hasCmd("sshfs")) {
       throw new Error(
         "sshfs is not installed. Please install sshfs to use remote SSH databases."
       );
     }
 
-    // Unmount any existing mount first
-    if (this.activeMountPoint) {
-      this._doUnmount(this.activeMountPoint);
-    }
-
     const mountPoint = fs.mkdtempSync(path.join(os.tmpdir(), "lbug-ssh-"));
 
     const sshOpts = [
-      `port=${port}`,
+      `port=${numericPort}`,
       "StrictHostKeyChecking=no",
       "UserKnownHostsFile=/dev/null",
       "reconnect",
     ];
 
-    let cmd;
+    let command;
+    let args;
     let passFile = null;
 
     if (password) {
@@ -72,17 +83,16 @@ class SSHManager {
       }
       passFile = path.join(os.tmpdir(), `lbug-pass-${Date.now()}`);
       fs.writeFileSync(passFile, password, { mode: 0o600 });
-      cmd = `sshpass -f ${passFile} sshfs -o ${sshOpts.join(",")} ${user}@${host}:${remoteDir} ${mountPoint}`;
+      command = "sshpass";
+      args = ["-f", passFile, "sshfs", "-o", sshOpts.join(","), `${user}@${host}:${remoteDir}`, mountPoint];
     } else if (privateKeyPath) {
       sshOpts.push(`IdentityFile=${privateKeyPath}`);
-      cmd = `sshfs -o ${sshOpts.join(",")} ${user}@${host}:${remoteDir} ${mountPoint}`;
-    } else {
-      try { fs.rmdirSync(mountPoint); } catch {}
-      throw new Error("Either password or privateKeyPath is required.");
+      command = "sshfs";
+      args = ["-o", sshOpts.join(","), `${user}@${host}:${remoteDir}`, mountPoint];
     }
 
     try {
-      execSync(cmd, { stdio: "pipe" });
+      execFileSync(command, args, { stdio: "pipe" });
     } catch (err) {
       try { fs.rmdirSync(mountPoint); } catch {}
       const stderr = err.stderr?.toString().trim() || err.message;
@@ -91,26 +101,39 @@ class SSHManager {
       if (passFile) try { fs.unlinkSync(passFile); } catch {}
     }
 
-    this.activeMountPoint = mountPoint;
-    this.activeConfig = {
-      host,
-      port: Number(port),
-      user,
-      remoteDir,
-      authType: password ? "password" : "key",
-      privateKeyPath: password ? undefined : privateKeyPath,
+    logger.info(`SSH mounted: ${user}@${host}:${remoteDir} -> ${mountPoint}`);
+    return {
+      mountPoint,
+      config: {
+        host,
+        port: numericPort,
+        user,
+        remoteDir,
+        authType: password ? "password" : "key",
+        privateKeyPath: password ? undefined : privateKeyPath,
+      },
     };
+  }
 
-    logger.info(`SSH mounted: ${user}@${host}:${remoteDir} → ${mountPoint}`);
-    return mountPoint;
+  activateMount(mountPoint, config) {
+    const previousMountPoint = this.activeMountPoint;
+    this.activeMountPoint = mountPoint;
+    this.activeConfig = { ...config };
+    if (previousMountPoint && previousMountPoint !== mountPoint) {
+      this._doUnmount(previousMountPoint);
+    }
+  }
+
+  unmount(mountPoint) {
+    this._doUnmount(mountPoint);
   }
 
   _doUnmount(mountPoint) {
     try {
       try {
-        execSync(`fusermount -u "${mountPoint}"`, { stdio: "pipe" });
+        execFileSync("fusermount", ["-u", mountPoint], { stdio: "pipe" });
       } catch {
-        execSync(`umount "${mountPoint}"`, { stdio: "pipe" });
+        execFileSync("umount", [mountPoint], { stdio: "pipe" });
       }
     } catch (err) {
       logger.warn(`Unmount warning for ${mountPoint}: ${err.message}`);

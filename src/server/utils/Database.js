@@ -112,18 +112,34 @@ class Database {
 
   init() {
     this.db = new lbug.Database(this.dbPath, this.bufferPoolSize, true, this.isReadOnlyMode);
-    this.connectionPool = [];
-    for (let i = 0; i < this.numberConnections; ++i) {
-      const conn = {
-        connection: new lbug.Connection(this.db, this.coresPerConnection),
-        useCount: 0,
-        id: i,
-      };
-      if (!isNaN(this.queryTimeout)) {
-        conn.connection.setQueryTimeout(this.queryTimeout);
+    this.connectionPool = this.createConnectionPool(this.db);
+  }
+
+  createConnectionPool(db) {
+    const connectionPool = [];
+    try {
+      for (let i = 0; i < this.numberConnections; ++i) {
+        const conn = {
+          connection: new lbug.Connection(db, this.coresPerConnection),
+          useCount: 0,
+          id: i,
+        };
+        if (!isNaN(this.queryTimeout)) {
+          conn.connection.setQueryTimeout(this.queryTimeout);
+        }
+        connectionPool.push(conn);
       }
-      this.connectionPool.push(conn);
+    } catch (err) {
+      connectionPool.forEach((conn) => {
+        try { conn.connection.close(); } catch {}
+      });
+      throw err;
     }
+    return connectionPool;
+  }
+
+  async closeConnectionPool(connectionPool) {
+    await Promise.all(connectionPool.map((conn) => conn.connection.close()));
   }
 
   get lbug() {
@@ -202,22 +218,38 @@ class Database {
     if (!isAllConnectionsReleased) {
       throw new Error("Please make sure no queries are running before reconfiguring.");
     }
-    const oldConnectionPool = this.connectionPool;
-    const oldDb = this.db;
-    this.connectionPool = [];
-    this.db = null;
-    await Promise.all(oldConnectionPool.map((conn) => conn.connection.close()));
-    oldDb.close();
+
+    let nextDbPath;
     if (inMemory) {
-      this.dbPath = ":memory:";
+      nextDbPath = ":memory:";
     } else {
       if (!dbDir) {
         throw new Error("dbDir is required for file-based mode.");
       }
       const fileName = dbFile || "database.kz";
-      this.dbPath = path.resolve(path.join(dbDir, fileName));
+      nextDbPath = path.resolve(path.join(dbDir, fileName));
     }
-    this.init();
+
+    const nextDb = new lbug.Database(nextDbPath, this.bufferPoolSize, true, this.isReadOnlyMode);
+    let nextConnectionPool;
+    try {
+      nextConnectionPool = this.createConnectionPool(nextDb);
+    } catch (err) {
+      try { nextDb.close(); } catch {}
+      throw err;
+    }
+
+    const oldConnectionPool = this.connectionPool;
+    const oldDb = this.db;
+    this.dbPath = nextDbPath;
+    this.db = nextDb;
+    this.connectionPool = nextConnectionPool;
+    try {
+      await this.closeConnectionPool(oldConnectionPool);
+      oldDb.close();
+    } catch (err) {
+      logger.warn(`Failed to close previous database cleanly: ${err.message}`);
+    }
   }
 
   async getSchema() {
