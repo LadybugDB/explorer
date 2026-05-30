@@ -23,12 +23,21 @@ router.post("/", async (req, res) => {
     const { mode, dbDir, dbFile, ssh } = req.body;
 
     if (mode === "ssh") {
+      if (!ssh) {
+        throw new Error("ssh config is required for SSH mode.");
+      }
       const { host, port = 22, user, password, privateKeyPath, remoteDir, remoteFile } = ssh;
-      const mountPoint = sshManager.mount({ host, port, user, password, privateKeyPath, remoteDir });
-      await database.reconfigure({ dbDir: mountPoint, dbFile: remoteFile || "database.kz", inMemory: false });
+      const mount = sshManager.mount({ host, port, user, password, privateKeyPath, remoteDir });
+      try {
+        await database.reconfigure({ dbDir: mount.mountPoint, dbFile: remoteFile || "database.kz", inMemory: false });
+        sshManager.activateMount(mount.mountPoint, mount.config);
+      } catch (err) {
+        sshManager.unmount(mount.mountPoint);
+        throw err;
+      }
     } else {
-      sshManager.unmountAll();
       await database.reconfigure({ dbDir, dbFile, inMemory: mode === "memory" });
+      sshManager.unmountAll();
     }
 
     res.send(buildResponse());
