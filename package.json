@@ -22,8 +22,8 @@
   "dependencies": {
     "@antv/g6": "^5.0.49",
     "@duckdb/duckdb-wasm": "1.29.0",
-    "@ladybugdb/core": "0.16.1",
-    "@ladybugdb/wasm-core": "0.16.1",
+    "@ladybugdb/core": "0.17.0",
+    "@ladybugdb/wasm-core": "0.17.0",
     "antlr4-c3": "3.2.3",
     "antlr4ng": "1.0.7",
     "bootstrap": "^5.3.1",
