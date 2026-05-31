@@ -1,4 +1,4 @@
-const baseURL = process.env.BASE_URL;
+const baseURL = process.env.BASE_URL || "";
 
 class HttpError extends Error {
   constructor(message, response) {
@@ -52,7 +52,7 @@ async function request(method, url, data, config = {}) {
     headers.set("Accept", "application/json");
   }
 
-  const response = await fetch(`${baseURL || ""}${url}`, options);
+  const response = await fetch(buildURL(url), options);
   const responseData = await parseResponse(response);
   const result = {
     data: responseData,
@@ -65,6 +65,18 @@ async function request(method, url, data, config = {}) {
     throw new HttpError(response.statusText || "Request failed", result);
   }
   return result;
+}
+
+function buildURL(url) {
+  if (/^[a-z][a-z\d+\-.]*:\/\//i.test(url) || url.startsWith("//")) {
+    return url;
+  }
+  if (!baseURL || baseURL === "/") {
+    return url.startsWith("/") ? url : `/${url}`;
+  }
+  const normalizedBaseURL = baseURL.endsWith("/") ? baseURL.slice(0, -1) : baseURL;
+  const normalizedURL = url.startsWith("/") ? url : `/${url}`;
+  return `${normalizedBaseURL}${normalizedURL}`;
 }
 
 export default {
