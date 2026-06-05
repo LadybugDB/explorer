@@ -46,6 +46,16 @@ const getDatasetPath = (dataset) => {
   return path.resolve(path.join(base, datasetPath));
 };
 
+const resolveCopyPath = (line, datasetPath) => {
+  return line.replace(
+    /(\bFROM\s+)(["'])(?!\/|[A-Za-z]:|https?:\/\/)([^"']+)\2/i,
+    (_, prefix, quote, filePath) => {
+      const resolvedPath = path.join(datasetPath, filePath).replaceAll("\\", "/");
+      return `${prefix}${quote}${resolvedPath}${quote}`;
+    }
+  );
+};
+
 router.get("/", async (_, res) => {
   await getDatasetsToShow();
   return res.send(Object.keys(DATASETS_TO_SHOW));
@@ -139,7 +149,7 @@ router.get("/:dataset/copy", async (req, res) => {
       .map((line) => line.trim())
       .filter((line) => line.length > 0)
       .map((line) => {
-        return line.replace("dataset/", base + "/")
+        return resolveCopyPath(line.replace("dataset/", base + "/"), datasetPath);
       });
     commands = ddls.concat(copyCommands);
   } catch (err) {
