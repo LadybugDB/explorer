@@ -12,7 +12,7 @@
     "build": "LBUG_IN_MEMORY=true LBUG_WASM=false NODE_ENV=production vue-cli-service build",
     "lint": "vue-cli-service lint",
     "fetch-datasets": "node src/server/utils/FetchDatasets.js",
-    "generate-grammar-prod": "python3 ladybug/scripts/antlr4/keywordhandler.py ladybug/src/antlr4/Cypher.g4 ladybug/src/antlr4/keywords.txt ./Cypher.g4 /tmp/header.h && rm /tmp/header.h && rm -rf src/utils/CypherParser/ && npx antlr4ng-cli -o src/utils/CypherParser -Dlanguage=TypeScript -no-visitor -no-listener Cypher.g4 && rm Cypher.g4 && cd src/utils/CypherParser && mv CypherParser.ts CypherParserOld.ts && grep -v \"notify\" CypherParserOld.ts > CypherParser.ts && rm CypherParserOld.ts",
+    "generate-grammar-prod": "node -e \"require('fs').accessSync('src/utils/CypherParser/CypherParser.ts'); console.log('Using checked-in Cypher parser')\"",
     "generate-grammar": "python3 ladybug/scripts/antlr4/keywordhandler.py ladybug/src/antlr4/Cypher.g4 ladybug/src/antlr4/keywords.txt ./Cypher.g4 /tmp/header.h && rm /tmp/header.h && rm -rf src/utils/CypherParser/ && npx antlr4ng-cli -o src/utils/CypherParser -Dlanguage=TypeScript -no-visitor -no-listener Cypher.g4 && rm Cypher.g4 && cd src/utils/CypherParser && mv CypherParser.ts CypherParserOld.ts && grep -v \"notify\" CypherParserOld.ts > CypherParser.ts && rm CypherParserOld.ts",
     "clean": "rm -rf node_modules dist datasets src/utils/CypherParser",
     "eslint": "eslint --ext .js,.vue src",
