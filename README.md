@@ -233,18 +233,34 @@ For more information regarding launching and using Ladybug Explorer, please refe
 npm i
 ```
 
-#### Download and compile Ladybug
+#### Install Ladybug native bindings
 
-```bash
-git submodule update --init --recursive
-npm run build-lbug
-```
+The `@ladybugdb/core` dependency installs the native module for your platform
+through its npm install script and optional platform packages.
 
 #### Generate grammar files
+
+The generated TypeScript parser is checked into `src/utils/CypherParser`, so
+you do not need to regenerate it for normal development. Regenerate it only
+when Ladybug's Cypher grammar changes.
+
+To update the grammar:
+
+1. Check out the Ladybug source tree at the version you want to match. For
+   release updates, use the commit or tag that corresponds to the
+   `@ladybugdb/core` version in `package.json`.
+2. Make the Ladybug checkout available at `./ladybug`. The generator currently
+   reads `ladybug/scripts/antlr4/keywordhandler.py`,
+   `ladybug/src/antlr4/Cypher.g4`, and `ladybug/src/antlr4/keywords.txt`.
+3. Run the generator:
 
 ```bash
 npm run generate-grammar
 ```
+
+4. Review and commit the regenerated files under `src/utils/CypherParser`.
+   The temporary `ladybug` checkout is only an input to generation and should
+   not be committed.
 
 #### Fetch datasets
 

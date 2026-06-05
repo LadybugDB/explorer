@@ -10,22 +10,7 @@ const CONSTANTS = require("./Constants");
 const MODES = CONSTANTS.MODES;
 const READ_WRITE_MODE = MODES.READ_WRITE;
 
-let lbug;
-if (process.env.NODE_ENV !== "production") {
-  const lbugPath = path.join(
-    __dirname,
-    "..",
-    "..",
-    "..",
-    "ladybug",
-    "tools",
-    "nodejs_api",
-    "build/"
-  );
-  lbug = require(lbugPath);
-} else {
-  lbug = require("@ladybugdb/core");
-}
+const lbug = require("@ladybugdb/core");
 const os = require("os");
 
 class Database {

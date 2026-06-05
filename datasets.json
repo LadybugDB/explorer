@@ -7,7 +7,20 @@
       "name": "Tutorial Dataset",
       "path": "demo-db/csv",
       "isProduction": true,
-      "description": "Data used in Create Your First Graph (https://docs.ladybugdb.com/get-started/) tutorial."
+      "description": "Data used in Create Your First Graph (https://docs.ladybugdb.com/get-started/) tutorial.",
+      "source": {
+        "type": "url",
+        "baseUrl": "https://huggingface.co/datasets/ladybugdb/demo-db/resolve/main",
+        "files": [
+          "city.csv",
+          "city.csv.gzip",
+          "copy.cypher",
+          "follows.csv",
+          "lives-in.csv",
+          "schema.cypher",
+          "user.csv"
+        ]
+      }
     },
     {
       "name": "TinySNB",
