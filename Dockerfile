@@ -8,7 +8,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 RUN echo "SKIP_GRAMMAR: $SKIP_GRAMMAR"
 RUN echo "SKIP_BUILD_APP: $SKIP_BUILD_APP"
 RUN echo "SKIP_DATASETS: $SKIP_DATASETS"
-RUN apt-get update && apt-get install -y libatomic1
+RUN apt-get update && apt-get install -y libatomic1 openssl ca-certificates && update-ca-certificates
 
 # Install dependencies
 RUN if [ "$SKIP_GRAMMAR" != "true" ] ; then apt-get update && apt-get install -y openjdk-21-jdk python3 python3-pip ; else echo "Skipping openjdk installation as grammar generation is skipped" ; fi
